@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Familia — Eat together, decide together</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#E9E4DA;
+  --phone-bg:#FFFBF7;
+  --surface:#FFF8F5;
+  --card:#FFFFFF;
+  --ink:#2F3D36;
+  --muted:#7A8B83;
+  --muted2:#A9B8B1;
+  --line:#E7DDD3;
+  --accent:#3E6B57;
+  --accent-2:#7A9B8A;
+  --accent-soft:#DDEEDB;
+  --green:#3E6B57;
+  --chip-bg:#E4F0DF;
+  --mint:#CDE6C5;
+  --mint-deep:#5A7D6B;
+  --sage:#5A7D6B;
+  --sage-dark:#3E6B57;
+  --cream:#FFF8F5;
+  --radius-xl:16px;
+  --radius-lg:14px;
+  --radius-md:10px;
+}
+body{
+  background: #E9E4DA;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color:var(--ink);
+  padding:24px;
+}
+.stage{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+}
+
+/* PHONE */
+.phone-wrap{
+  position:relative;
+  flex-shrink:0;
+}
+.phone{
+  width:390px;
+  height:844px;
+  background:var(--phone-bg);
+  border-radius:54px;
+  border:10px solid #2F3D36;
+  position:relative;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 1px rgba(90,125,107,0.18) inset,
+    0 30px 60px rgba(62,107,87,0.22),
+    0 10px 24px rgba(62,107,87,0.14);
+}
+.phone-inner{
+  position:absolute;
+  inset:0;
+  border-radius:44px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  background:var(--surface);
+}
+.punch{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:96px;
+  height:28px;
+  background:#0F0F12;
+  border-radius:999px;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:9px;
+  gap:6px;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+}
+.punch-dot{
+  width:16px; height:16px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #2A2A30 0%, #0A0A0C 65%);
+  border:1px solid #2A2A2E;
+  box-shadow: inset 0 0 6px rgba(120,160,255,0.35);
+}
+.side-btn{
+  position:absolute;
+  background:#0F0F12;
+  border:1px solid #1E1E22;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.side-btn.power{
+  right:-13px; top:148px; width:4px; height:92px; border-radius:0 4px 4px 0;
+}
+.side-btn.vol-up{
+  left:-5px; top:132px; width:4px; height:54px; border-radius:4px 0 0 4px;
+}
+.side-btn.vol-down{
+  left:-5px; top:196px; width:4px; height:54px; border-radius:4px 0 0 4px;
+}
+
+.statusbar{
+  height:48px;
+  padding:14px 26px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:14px;
+  font-weight:700;
+  color:#0F0F12;
+  background:#fff;
+  position:relative;
+  z-index:10;
+  flex-shrink:0;
+}
+.statusbar span:last-child{
+  display:flex; align-items:center; gap:6px; font-weight:600; font-size:12.5px;
+}
+.battery{
+  width:26px; height:12px; border:1.5px solid #0F0F12; border-radius:4px; position:relative; display:inline-flex; align-items:center; padding:1px;
+}
+.battery i{width:14px; height:7px; background:#0F0F12; border-radius:1px; display:block;}
+.battery::after{content:""; position:absolute; right:-4px; top:3px; width:2px; height:5px; background:#0F0F12; border-radius:0 2px 2px 0}
+
+/* SCREENS */
+.screens{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  background:var(--cream);
+}
+.screen{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--cream);
+}
+.screen.active{display:flex}
+.screen-scroll{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:none;
+}
+.screen-scroll::-webkit-scrollbar{display:none}
+
+/* Generic */
+.pad{padding:0 18px}
+.topbar{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 18px 8px;
+  background:var(--sage);
+  color:#fff;
+  position:sticky; top:0; z-index:5;
+  border-bottom:none;
+}
+.icon-btn{
+  width:36px; height:36px; border-radius:10px;
+  display:grid; place-items:center;
+  background:#fff; border:1px solid #CBD8CF; color:#3E6B57;
+  cursor:pointer; flex-shrink:0;
+}
+.btn-primary{
+  background:var(--sage-dark);
+  color:#fff;
+  border:1px solid var(--sage-dark);
+  border-radius:12px;
+  padding:13px 18px;
+  font-weight:700;
+  font-size:13.5px;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%;
+  box-shadow:none;
+  transition:transform .15s, opacity .15s;
+  line-height:1;
+}
+.btn-primary:active{transform:scale(0.99)}
+.btn-primary.accent{background:var(--mint); color:#2F4A3E; border:1px solid #A9CFA4; box-shadow:none}
+.btn-ghost{
+  background:#fff;
+  border:1.5px solid var(--sage);
+  color:var(--sage-dark);
+  border-radius:12px;
+  padding:12px 16px;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  width:100%;
+  line-height:1;
+}
+
+/* LANDING — Familia welcome */
+.landing{flex:1; display:flex; flex-direction:column; background:var(--phone-bg)}
+.landing-hero{flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; padding:34px 24px 0}
+.landing-title{font-family:Caveat, cursive; font-size:64px; font-weight:700; line-height:1; color:#2E6B4E; letter-spacing:0}
+.landing-sub{font-size:14px; font-weight:500; color:#2F3D36; margin-top:10px; line-height:1.4}
+.landing-visual{position:relative; width:100%; display:grid; place-items:center; margin-top:20px; min-height:300px; flex:1}
+.landing-blob{position:absolute; width:308px; height:308px; background:#F5ECDD; border-radius:58% 42% 55% 45% / 48% 55% 45% 52%;}
+.landing-img{position:relative; width:264px; height:264px; border-radius:50%; object-fit:cover; border:7px solid #fff; box-shadow:0 18px 44px rgba(62,107,87,0.22); display:block}
+.landing-cta{padding:14px 20px calc(22px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; background:var(--phone-bg)}
+.landing-primary{border-radius:28px; padding:16px 18px; font-size:15px}
+.landing-skip{border-radius:28px; padding:15px 18px; font-size:15px; background:#fff}
+
+/* SETUP — Tasty Start gradient */
+.setup-header{
+  padding:18px 20px 14px;
+  background:linear-gradient(180deg, #A3B25B 0%, #5FA47E 48%, #2E8B6E 100%);
+  color:#fff;
+}
+.setup-header h2{
+  font-family:Caveat, cursive;
+  font-size:44px;
+  font-weight:700;
+  letter-spacing:0;
+  line-height:1;
+  margin-bottom:8px;
+  color:#fff;
+}
+.setup-header p{color:rgba(255,255,255,0.92); font-size:12.5px; line-height:1.5}
+.setup-body{padding:16px 18px 96px; display:flex; flex-direction:column; gap:16px; background:var(--cream)}
+.setup-footer{
+  padding:14px 18px calc(18px + env(safe-area-inset-bottom));
+  background:var(--cream);
+  border-top:1px solid var(--line);
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  box-shadow:none;
+}
+.card-white{
+  background:#fff;
+  border-radius:14px;
+  border:1px solid var(--line);
+  padding:16px;
+  box-shadow:none;
+}
+.label{
+  font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#7A8B83; margin-bottom:10px; display:block;
+}
+.input{
+  width:100%;
+  background:#fff;
+  border:1.5px solid #CBD8CF;
+  border-radius:10px;
+  padding:13px 14px;
+  font-size:14.5px;
+  font-weight:500;
+  outline:none;
+  transition:border .15s, background .15s;
+}
+.input:focus{border-color:var(--sage-dark); background:#fff}
+.input::placeholder{color:#A9B8B1}
+.hint{font-size:12px; color:#A9A9B6; margin-top:8px; line-height:1.4}
+.members-list{display:flex; flex-direction:column; gap:10px}
+.member-row{
+  display:flex; align-items:center; gap:12px;
+  background:var(--mint);
+  border:1px solid #A9CFA4;
+  border-radius:10px;
+  padding:10px 10px 10px 12px;
+}
+.member-avatar{
+  width:42px; height:42px; border-radius:999px;
+  display:grid; place-items:center;
+  font-weight:800; font-size:14px; color:#fff;
+  flex-shrink:0;
+}
+.member-meta{flex:1; min-width:0}
+.member-meta b{font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.member-meta span{font-size:11.5px; color:#8B8B97; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px}
+.chip{
+  font-size:12.5px; font-weight:600;
+  padding:7px 12px;
+  border-radius:10px;
+  background:var(--mint);
+  border:1px solid #A9CFA4;
+  color:#2F4A3E;
+  cursor:pointer;
+  user-select:none;
+  transition: all .15s;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.chip.on{
+  background:var(--sage-dark); color:#fff; border-color:var(--sage-dark);
+}
+.chip.req.on{background:#B7791F; border-color:#B7791F; color:#fff}
+.chip.allergy.on{background:#2F3D36; color:#fff; border-color:#2F3D36}
+.chip.pref.on{background:var(--sage-dark); border-color:var(--sage-dark); color:#fff}
+.chip-legend{display:flex; gap:10px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#7A8B83; margin-top:8px}
+.dot{width:8px; height:8px; border-radius:999px; display:inline-block}
+.dot.req{background:#B7791F}
+.dot.pref{background:#3E6B57}
+.add-member-btn{
+  width:100%;
+  border:1.5px dashed #A9CFA4;
+  background:#EDF5EA;
+  border-radius:10px;
+  padding:14px;
+  font-weight:700; font-size:14px;
+  color:#3E6B57;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.add-member-btn:hover{background:#E0EEDC}
+
+/* Modal */
+.modal-backdrop{
+  position:absolute; inset:0;
+  background:rgba(17,17,22,0.48);
+  backdrop-filter: blur(6px);
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:70;
+  padding:0;
+}
+.modal-backdrop.open{display:flex}
+.sheet{
+  width:100%;
+  background:#fff;
+  border-radius:26px 26px 0 0;
+  max-height:86%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  animation: sheetIn .28s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes sheetIn{from{transform:translateY(18px); opacity:0} to{transform:translateY(0); opacity:1}}
+.sheet-head{
+  padding:14px 18px 12px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid #F0EDE9;
+  position:sticky; top:0; background:#fff;
+}
+.sheet-head b{font-size:15px}
+.sheet-body{padding:14px 18px; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; display:flex; flex-direction:column; gap:12px}
+.sheet-body::-webkit-scrollbar{display:none}
+.sheet-foot{padding:14px 18px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid #F0EDE9; display:flex; gap:10px; background:#fff}
+.chip-grid{display:flex; flex-wrap:wrap; gap:6px}
+/* Member sheet — fit without visible scrollbar */
+#memberSheet .sheet{max-height:94%}
+#memberSheet .sheet-body{gap:12px; padding:14px 18px}
+#memberSheet .label{margin-bottom:6px}
+#memberSheet .chip{font-size:12px; padding:6px 10px}
+#memberSheet .hint{font-size:11px; margin-top:6px}
+#memberSheet .input{padding:10px 12px}
+#memberSheet .sheet-head{padding:12px 18px 10px}
+#memberSheet .sheet-foot{padding:10px 18px calc(10px + env(safe-area-inset-bottom))}
+
+/* HOME — Tasty */
+.home-top{
+  background:var(--sage);
+  padding:14px 18px 14px;
+  border-bottom:none;
+}
+.greeting{
+  font-family:Caveat, cursive;
+  font-size:30px; letter-spacing:0; line-height:1; margin-bottom:6px; color:#fff;
+}
+.location{
+  font-size:11.5px; color:rgba(255,255,255,0.92); font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+}
+.location b{color:#fff}
+.search-row{
+  display:flex; gap:10px; margin-top:14px;
+}
+.search{
+  flex:1;
+  background:#fff;
+  border:1.5px solid #fff;
+  border-radius:10px;
+  display:flex; align-items:center; gap:10px;
+  padding:0 14px;
+  height:42px;
+}
+.search input{
+  flex:1; border:none; background:transparent; outline:none; font-size:13.5px; font-weight:500;
+}
+.search input::placeholder{color:#A9B8B1}
+.filter-btn{
+  width:42px; height:42px;
+  border-radius:10px;
+  background:var(--sage-dark); color:#fff;
+  display:grid; place-items:center;
+  border:1px solid rgba(255,255,255,0.25); cursor:pointer; flex-shrink:0;
+}
+.quick-filters{
+  display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; padding:12px 18px 4px; scroll-snap-type:x mandatory;
+  mask-image:linear-gradient(to right, black 88%, transparent 100%);
+}
+.quick-filters::-webkit-scrollbar{display:none}
+.qchip{
+  white-space:nowrap; scroll-snap-align:start;
+  padding:7px 12px; border-radius:10px;
+  font-size:12px; font-weight:650;
+  border:1.5px solid #D8E4D5; background:#fff; color:#3E6B57; cursor:pointer;
+}
+.qchip.on{background:var(--sage-dark); color:#fff; border-color:var(--sage-dark)}
+.restaurant-list{
+  padding:14px 18px 96px;
+  display:flex; flex-direction:column; gap:14px; background:var(--cream);
+}
+.r-card{
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  box-shadow:none;
+  cursor:pointer;
+  transition: transform .16s;
+}
+.r-card:active{transform:scale(0.99)}
+.r-img{
+  height:156px; position:relative; overflow:hidden; background:#ECE9E6;
+}
+.r-img img{width:100%; height:100%; object-fit:cover; display:block}
+.r-img::after{content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.38) 0%, transparent 55%)}
+.r-time{
+  position:absolute; bottom:12px; right:12px;
+  background:rgba(47,61,54,0.88);
+  color:#fff; font-size:12px; font-weight:700;
+  padding:6px 10px; border-radius:10px;
+  z-index:1;
+}
+.r-body{padding:14px 14px 14px}
+.r-title{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:6px;
+}
+.r-title h3{font-size:15px; font-weight:800; letter-spacing:-0.02em; line-height:1.1; color:#2F3D36}
+.r-rating{
+  display:flex; align-items:center; gap:4px;
+  font-size:12.5px; font-weight:800; color:#3E6B57; white-space:nowrap;
+}
+.r-rating span{color:#3E6B57; letter-spacing:2px}
+.r-meta{
+  font-size:12.5px; color:#7A8B83; font-weight:600; display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:10px;
+}
+.r-meta b{color:#2F3D36}
+.dotsep{width:3px; height:3px; border-radius:999px; background:#CBD8CF; display:inline-block}
+.r-tags{display:flex; flex-wrap:wrap; gap:6px}
+.mini-tag{
+  font-size:11.5px; font-weight:650; padding:6px 10px; border-radius:10px; background:var(--mint); border:1px solid #A9CFA4; color:#2F4A3E;
+}
+.mini-tag.dark{background:var(--sage-dark); color:#fff; border-color:var(--sage-dark)}
+.mini-tag.green{background:var(--mint); color:#2F4A3E; border-color:#A9CFA4}
+
+/* Detail */
+.detail-hero{
+  height:232px; position:relative; background:#ECE9E6; flex-shrink:0; overflow:hidden;
+}
+.detail-hero img{width:100%; height:100%; object-fit:cover; display:block}
+.detail-hero::after{content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.08) 45%, transparent 70%)}
+.detail-hero-top{
+  position:absolute; top:12px; left:12px; right:12px;
+  display:flex; justify-content:space-between; align-items:center; z-index:2;
+}
+.detail-hero-bottom{
+  position:absolute; bottom:14px; left:16px; right:16px; z-index:2; color:#fff;
+}
+.detail-hero-bottom h2{font-family:Caveat, cursive; font-size:32px; line-height:1; letter-spacing:0; margin-bottom:5px; text-shadow:0 2px 12px rgba(0,0,0,0.35)}
+.detail-hero-bottom .stars{font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px; opacity:0.95}
+.detail-hero-bottom .stars span{color:#fff; letter-spacing:2px}
+.detail-pill{
+  background:rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800; display:flex; align-items:center; gap:6px;
+}
+.detail-content{padding:14px 18px 96px; display:flex; flex-direction:column; gap:14px}
+.detail-tagrow{display:flex; flex-wrap:wrap; gap:6px}
+.detail-tagrow .mini-tag{font-size:11.5px; padding:5px 9px}
+.map-card{
+  background:#fff; border-radius:14px; border:1px solid var(--line); overflow:hidden;
+}
+.map{
+  height:148px; background:
+    radial-gradient(circle at 30% 30%, #DDE7F5 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, #FFE9E6 0%, transparent 35%),
+    linear-gradient(#EEF2F7, #E8EEF6);
+  position:relative; overflow:hidden;
+}
+.map-grid{
+  position:absolute; inset:0; opacity:0.55;
+  background-image:
+    linear-gradient(rgba(17,17,22,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17,17,22,0.06) 1px, transparent 1px);
+  background-size:34px 34px;
+}
+.map-road{
+  position:absolute; background:#fff; border:1px solid #D9E1EE; box-shadow:0 2px 8px rgba(17,17,22,0.08);
+}
+.map-pin{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-58%);
+  width:36px; height:36px; background:var(--sage-dark); border-radius:50% 50% 50% 0; transform:translate(-50%,-58%) rotate(-45deg);
+  display:grid; place-items:center; box-shadow:none; border:3px solid #fff;
+}
+.map-pin i{transform:rotate(45deg); color:#fff}
+.info-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+.info-card{
+  background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 11px;
+}
+.info-card small{font-size:10px; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; color:#8B8B97; display:block; margin-bottom:5px}
+.info-card b{font-size:12px; line-height:1.3}
+.info-card span{font-size:11px; color:#8B8B97; display:block; margin-top:2px; line-height:1.3}
+.review-cta{
+  background:var(--sage-dark); color:#fff; border-radius:14px; padding:16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; border:none; width:100%; text-align:left;
+}
+.review-cta div b{font-size:15px; display:block}
+.review-cta div span{font-size:12.5px; color:rgba(255,255,255,0.85)}
+.review-cta i{width:42px; height:42px; border-radius:10px; background:var(--mint); color:#2F4A3E; display:grid; place-items:center; flex-shrink:0}
+.family-reviews{display:flex; flex-direction:column; gap:12px}
+.section-title{font-size:15px; font-weight:800; letter-spacing:-0.02em; display:flex; align-items:center; gap:8px; color:#2F3D36}
+.fam-review{
+  background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px;
+}
+.fam-review-head{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:10px;
+}
+.fam-review-head b{font-size:14px}
+.fam-pill{font-size:11.5px; font-weight:800; background:var(--sage-dark); color:#fff; padding:5px 9px; border-radius:8px; display:flex; align-items:center; gap:4px}
+.member-review{border-top:1px solid #F0EDE9; padding:10px 0 0; margin-top:10px}
+.member-review:first-of-type{border-top:none; margin-top:0; padding-top:0}
+.mr-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+.mr-head b{font-size:13px}
+.mr-head span{font-size:12px; color:#3E6B57; letter-spacing:2px; font-weight:700}
+.mr-comment{font-size:13px; line-height:1.45; color:#2F3D36; font-style:italic; margin-bottom:8px}
+.mr-tags{display:flex; flex-wrap:wrap; gap:6px}
+
+/* Reviews — new restaurant form + inline detail rating */
+.nr-body{padding:16px 18px 24px; display:flex; flex-direction:column; gap:16px; background:var(--cream)}
+.nr-photo{display:flex; align-items:center; justify-content:center; border:1.5px dashed #CBD8CF; background:#F6FAF4; border-radius:10px; padding:18px; cursor:pointer; overflow:hidden; min-height:96px}
+.nr-photo img{width:100%; max-height:190px; object-fit:cover; border-radius:8px; display:block}
+.nr-sub{font-size:12px; font-weight:700; color:#7A8B83; margin-bottom:8px}
+.nr-visit-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:end}
+.stepper{display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid #CBD8CF; border-radius:10px; padding:6px 8px}
+.step-btn{width:34px; height:34px; border-radius:8px; border:1.5px solid #CBD8CF; background:var(--mint); color:#2F4A3E; font-weight:800; font-size:18px; cursor:pointer; line-height:1}
+#nrPartyVal{font-size:16px; font-weight:800}
+.nr-ratings{display:flex; flex-direction:column; gap:8px}
+.nr-rate-row{display:flex; align-items:center; gap:10px; background:#F6FAF4; border:1px solid #E3EDE1; border-radius:10px; padding:8px 10px}
+.nr-rate-row .av{width:30px; height:30px; border-radius:999px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:12px; flex-shrink:0}
+.nr-rate-row b{font-size:13px; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.mini-stars{display:flex; gap:4px; flex-shrink:0}
+.mini-stars .star-btn{width:30px; height:30px}
+.review-foot{padding:12px 14px calc(12px + env(safe-area-inset-bottom)); background:var(--cream); border-top:1px solid var(--line); display:flex; gap:10px; flex-shrink:0}
+#screen-review .screen-scroll{min-height:0}
+#screen-review .bottom-nav{position:static; border-radius:0; flex-shrink:0}
+.star-btn{
+  width:36px; height:36px; border-radius:10px; border:1.5px solid #CBD8CF; background:#fff; display:grid; place-items:center; cursor:pointer; color:#CBD8CF; transition:all .15s;
+}
+.star-btn.on{background:var(--mint); border-color:var(--sage-dark); color:var(--sage-dark)}
+.star-btn.on svg{fill:var(--sage-dark)}
+.textarea{
+  width:100%; min-height:78px; background:#fff; border:1.5px solid #CBD8CF; border-radius:10px; padding:12px 14px; font-size:14px; outline:none; resize:none;
+}
+.textarea:focus{background:#fff; border-color:var(--sage-dark)}
+
+/* AI */
+.ai-header{
+  background:#fff; padding:14px 18px 12px; border-bottom:1px solid #F0EDE9;
+}
+.ai-header h2{font-family:Caveat, cursive; font-size:30px; letter-spacing:0; line-height:1; display:flex; align-items:center; gap:9px; color:#2F3D36}
+.ai-header h2 span{width:28px; height:28px; border-radius:999px; background:var(--sage-dark); display:grid; place-items:center; color:#fff; font-size:15px}
+.ai-header p{font-size:12.5px; color:#5A6E65; line-height:1.5; margin-top:6px}
+.ai-body{padding:14px 18px 96px; display:flex; flex-direction:column; gap:14px; background:var(--cream)}
+.eater-grid{display:flex; flex-wrap:wrap; gap:8px}
+.eater{
+  display:flex; align-items:center; gap:9px;
+  padding:8px 12px 8px 9px;
+  border-radius:10px;
+  border:1.5px solid #CBD8CF;
+  background:var(--mint);
+  color:#2F4A3E;
+  cursor:pointer;
+  font-weight:700; font-size:12.5px;
+  transition:all .15s;
+}
+.eater.on{background:var(--sage-dark); color:#fff; border-color:var(--sage-dark)}
+.eater .av{width:28px; height:28px; border-radius:999px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:11.5px; flex-shrink:0}
+.ai-input-card{
+  background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:12px;
+}
+.ai-textarea{
+  width:100%; min-height:56px; border:none; outline:none; font-size:13.5px; line-height:1.5; resize:none; font-family:inherit; color:#2F3D36;
+}
+.ai-textarea::placeholder{color:#A9B8B1; font-size:13px}
+.ai-examples{display:flex; flex-wrap:nowrap; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px}
+.ai-examples::-webkit-scrollbar{display:none}
+.ai-ex{
+  font-size:11px; font-weight:650; padding:7px 11px; border-radius:10px; background:var(--mint); border:1px solid #A9CFA4; color:#2F4A3E; cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+.ai-ex:hover{background:#E0EEDC}
+.ai-result{
+  background:#fff; color:#2F3D36; border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:12px; box-shadow:none; border:1px solid var(--line);
+}
+.ai-result-head{display:flex; gap:12px; align-items:flex-start}
+.ai-result-head img{width:72px; height:72px; border-radius:10px; object-fit:cover; flex-shrink:0}
+.ai-match{
+  background:var(--mint); color:#2F4A3E; font-size:11px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; padding:5px 9px; border-radius:10px; display:inline-flex; align-items:center; gap:4px; margin-bottom:6px; border:1px solid #A9CFA4;
+}
+.ai-why{list-style:none; display:flex; flex-direction:column; gap:7px}
+.ai-why li{font-size:12.5px; line-height:1.4; display:flex; gap:8px; color:#2F3D36}
+.ai-why li i{color:var(--sage-dark); flex-shrink:0; margin-top:1px}
+.ai-empty{
+  background:#fff; border:1.5px dashed #CBD8CF; border-radius:14px; padding:22px; text-align:center;
+}
+.ai-empty b{font-size:14px; display:block; margin-bottom:6px}
+.ai-empty span{font-size:12.5px; color:#7A8B83; line-height:1.5; display:block}
+
+/* Bottom nav — Tasty sage */
+.bottom-nav{
+  position:absolute; left:0; right:0; bottom:0;
+  background:var(--sage);
+  backdrop-filter:none;
+  border-radius:14px 14px 0 0;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+  display:grid; grid-template-columns:repeat(4,1fr); align-items:center;
+  gap:6px;
+  box-shadow:none;
+  z-index:12;
+  border:none;
+  border-top:1px solid rgba(255,255,255,0.2);
+}
+.nav-item{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  padding:7px 2px; border-radius:10px; cursor:pointer; color:rgba(255,255,255,0.85); font-size:9px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; transition:all .15s;
+  border:none; background:transparent; min-width:0; width:100%;
+}
+.nav-item.on{color:#fff; background:rgba(255,255,255,0.18)}
+.nav-item i{width:18px; height:18px; display:grid; place-items:center}
+.nav-center{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  padding:7px 2px; border-radius:10px; cursor:pointer; color:rgba(255,255,255,0.85); font-size:9px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; transition:all .15s;
+  border:none; background:transparent; min-width:0; width:100%;
+}
+.nav-center .nav-icon{
+  width:22px; height:22px; border-radius:999px; background:rgba(255,255,255,0.18); display:grid; place-items:center; color:#fff; border:1px solid rgba(255,255,255,0.25); transition:all .15s;
+}
+.nav-center .nav-icon i, .nav-center .nav-icon svg{width:13px; height:13px}
+.nav-center.on{color:#fff; background:rgba(255,255,255,0.18)}
+.nav-center.on .nav-icon{background:#fff; color:var(--sage-dark); border-color:#fff; box-shadow:none}
+.nav-center:active{transform:scale(0.98)}
+.nav-spacer{display:none}
+
+/* Filter sheet */
+.range{width:100%}
+.price-row{display:flex; gap:8px}
+.price-chip{flex:1; padding:10px; border-radius:10px; border:1.5px solid #CBD8CF; background:var(--mint); color:#2F4A3E; font-weight:700; font-size:13px; cursor:pointer; text-align:center; min-height:48px; display:flex; align-items:center; justify-content:center; line-height:1.2}
+.price-chip.on{background:var(--sage-dark); color:#fff; border-color:var(--sage-dark)}
+
+/* Scrollbar hide + safe */
+/* Mobile — drop the phone-frame chrome (punch, side buttons, fake statusbar), go full-bleed */
+@media (max-width: 920px){
+  body{padding:0; background:var(--phone-bg)}
+  .stage{width:100%}
+  .phone-wrap{width:100%}
+  .phone{width:100vw; height:100vh; height:100dvh; border:none; border-radius:0; box-shadow:none}
+  .phone-inner{border-radius:0}
+  .punch, .side-btn, .statusbar{display:none !important}
+  .bottom-nav{border-radius:0}
+}
+/* JS-detected mobile (UA/touch) — same treatment even on wide viewports e.g. landscape tablets */
+body.is-mobile{padding:0; background:var(--phone-bg)}
+body.is-mobile .stage{width:100%}
+body.is-mobile .phone-wrap{width:100%}
+body.is-mobile .phone{width:100vw; height:100vh; height:100dvh; border:none; border-radius:0; box-shadow:none}
+body.is-mobile .phone-inner{border-radius:0}
+body.is-mobile .punch, body.is-mobile .side-btn, body.is-mobile .statusbar{display:none !important}
+body.is-mobile .bottom-nav{border-radius:0}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone-wrap">
+    <div class="side-btn vol-up"></div>
+    <div class="side-btn vol-down"></div>
+    <div class="side-btn power"></div>
+    <div class="phone">
+      <div class="phone-inner">
+        <div class="punch"><div class="punch-dot"></div></div>
+        <div class="statusbar">
+          <span id="clock">9:41</span>
+          <span>
+            <i data-lucide="signal" style="width:16px;height:16px"></i>
+            <i data-lucide="wifi" style="width:16px;height:16px"></i>
+            <span class="battery"><i></i></span>
+          </span>
+        </div>
+
+        <div class="screens">
+          <!-- SCREEN 0 — LANDING -->
+          <div class="screen active" id="screen-landing">
+            <div class="landing">
+              <div class="landing-hero">
+                <h1 class="landing-title">Familia</h1>
+                <p class="landing-sub">Find food every family member loves</p>
+                <div class="landing-visual">
+                  <div class="landing-blob"></div>
+                  <img class="landing-img" src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&auto=format&fit=crop&q=80" alt="Family food spread" onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80'">
+                </div>
+              </div>
+              <div class="landing-cta">
+                <button class="btn-primary landing-primary" id="landingCreate">Create your family</button>
+                <button class="btn-ghost landing-skip" id="landingSkip">Skip</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCREEN 1 — FAMILY SETUP -->
+          <div class="screen" id="screen-setup">
+            <div class="screen-scroll">
+              <div class="setup-header">
+                <h2>Create your family</h2>
+                <p>Tell us who's eating with you. We'll use this to make better restaurant recommendations.</p>
+              </div>
+              <div class="setup-body">
+                <div class="card-white">
+                  <label class="label">Family name <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(optional)</span></label>
+                  <input id="familyNameInput" class="input" placeholder="e.g. The Khan Family" maxlength="28">
+                  <div class="hint">Shown on your family reviews and AI recommendations.</div>
+                </div>
+
+                <div class="card-white">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px">
+                    <label class="label" style="margin:0">Family members <span id="memberCount" style="background:var(--sage-dark); color:#fff; padding:2px 7px; border-radius:8px; font-size:11px; margin-left:6px">0</span></label>
+                    <span style="font-size:11.5px; color:#ACACB8; font-weight:600">up to 10</span>
+                  </div>
+                  <div id="membersList" class="members-list">
+                    <div id="emptyMembers" style="text-align:center; padding:16px 10px; border:1.5px dashed #E8E2DE; border-radius:16px; background:#FFFCFB">
+                      <div style="width:36px;height:36px; border-radius:999px; background:#F1EFEA; display:grid; place-items:center; margin:0 auto 8px; color:#8B8B97"><i data-lucide="user-plus" style="width:16px;height:16px"></i></div>
+                      <div style="font-weight:750; font-size:13px">No members yet</div>
+                      <div style="font-size:11.5px; color:#8B8B97; margin-top:4px; line-height:1.4">Add the people you usually eat with. You can skip this and add later.</div>
+                    </div>
+                  </div>
+                  <button class="add-member-btn" id="addMemberBtn" style="margin-top:12px"><i data-lucide="plus" style="width:16px;height:16px"></i> Add family member</button>
+                  <div class="chip-legend"><span class="dot req"></span> Requirement &nbsp; <span class="dot pref"></span> Preference</div>
+                </div>
+
+              </div>
+            </div>
+            <nav class="bottom-nav">
+              <button class="nav-item" data-nav="home"><i data-lucide="compass" style="width:17px;height:17px"></i> Discover</button>
+              <button class="nav-center" data-nav="ai" aria-label="Family AI"><span class="nav-icon"><i data-lucide="bot" style="width:13px;height:13px"></i></span><span>AI</span></button>
+              <button class="nav-item" data-nav="reviews"><i data-lucide="star" style="width:17px;height:17px"></i> Reviews</button>
+              <button class="nav-item on" data-nav="family"><i data-lucide="users" style="width:17px;height:17px"></i> Family</button>
+            </nav>
+          </div>
+
+          <!-- SCREEN 2 — HOME -->
+          <div class="screen" id="screen-home">
+            <div class="screen-scroll" id="homeScroll">
+              <div class="home-top">
+                <div class="greeting" id="greeting">Good evening</div>
+                <div class="location"><i data-lucide="map-pin" style="width:14px;height:14px; color:#E07B39"></i> <span id="locationText">UAE • Abu Dhabi</span></div>
+                <div class="search-row">
+                  <label class="search">
+                    <i data-lucide="search" style="width:16px;height:16px; color:#ACACB8"></i>
+                    <input id="searchInput" placeholder="Search restaurants...">
+                  </label>
+                  <button class="filter-btn" id="openFilters"><i data-lucide="sliders-horizontal" style="width:18px;height:18px"></i></button>
+                </div>
+              </div>
+              <div class="quick-filters" id="quickFilters">
+                <button class="qchip on" data-q="all">All</button>
+                <button class="qchip" data-q="Halal">Halal</button>
+                <button class="qchip" data-q="Under AED 50">Under AED 50</button>
+                <button class="qchip" data-q="Family friendly">Family friendly</button>
+                <button class="qchip" data-q="Outdoor">Outdoor</button>
+                <button class="qchip" data-q="Vegetarian">Vegetarian</button>
+              </div>
+              <div class="restaurant-list" id="restaurantList"></div>
+            </div>
+            <nav class="bottom-nav">
+              <button class="nav-item on" data-nav="home"><i data-lucide="compass" style="width:17px;height:17px"></i> Discover</button>
+              <button class="nav-center" data-nav="ai" id="aiFab" aria-label="Family AI"><span class="nav-icon"><i data-lucide="bot" style="width:13px;height:13px"></i></span><span>AI</span></button>
+              <button class="nav-item" data-nav="reviews"><i data-lucide="star" style="width:17px;height:17px"></i> Reviews</button>
+              <button class="nav-item" data-nav="family"><i data-lucide="users" style="width:17px;height:17px"></i> Family</button>
+            </nav>
+          </div>
+
+          <!-- SCREEN 3 — RESTAURANT DETAIL -->
+          <div class="screen" id="screen-detail">
+            <div class="screen-scroll" id="detailScroll">
+              <div class="detail-hero" id="detailHero">
+                <img id="detailImg" src="" alt="">
+                <div class="detail-hero-top">
+                  <button class="icon-btn" id="detailBack"><i data-lucide="arrow-left" style="width:18px;height:18px"></i></button>
+                </div>
+                <div class="detail-hero-bottom">
+                  <h2 id="detailName">Anatolia Kitchen</h2>
+                  <div class="stars"><span id="detailStars">★★★★★</span> <b id="detailRating">4.7 / 5</b> <span style="opacity:0.85; font-weight:500" id="detailSub">• Turkish • 0.8 km</span></div>
+                </div>
+              </div>
+              <div class="detail-content" id="detailContent"></div>
+            </div>
+            <nav class="bottom-nav">
+              <button class="nav-item" data-nav="home"><i data-lucide="compass" style="width:17px;height:17px"></i> Discover</button>
+              <button class="nav-center" data-nav="ai" id="detailAiFab" aria-label="Family AI"><span class="nav-icon"><i data-lucide="bot" style="width:13px;height:13px"></i></span><span>AI</span></button>
+              <button class="nav-item" data-nav="reviews"><i data-lucide="star" style="width:17px;height:17px"></i> Reviews</button>
+              <button class="nav-item" data-nav="family"><i data-lucide="users" style="width:17px;height:17px"></i> Family</button>
+            </nav>
+          </div>
+
+          <!-- SCREEN 4 — NEW RESTAURANT REVIEW -->
+          <div class="screen" id="screen-review">
+            <div class="topbar">
+              <div style="flex:1; min-width:0">
+                <div style="font-weight:800; font-size:14px; color:#fff">New restaurant review</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.85); font-weight:600">Been somewhere new? Add it for every family.</div>
+              </div>
+            </div>
+            <div class="screen-scroll">
+              <div class="nr-body">
+                <div class="card-white">
+                  <label class="label">Restaurant name</label>
+                  <input id="nrName" class="input" placeholder="e.g. Olive Branch" maxlength="40">
+                  <div class="label" style="margin-top:14px">Photo</div>
+                  <label class="nr-photo" id="nrPhotoZone">
+                    <input type="file" id="nrPhoto" accept="image/*" hidden>
+                    <span id="nrPhotoEmpty" style="display:flex; flex-direction:column; align-items:center; gap:8px; color:#7A8B83; font-size:12.5px; font-weight:600"><i data-lucide="image-plus" style="width:22px;height:22px"></i> Add a photo of the place</span>
+                    <img id="nrPhotoPreview" alt="Restaurant photo" style="display:none">
+                  </label>
+                  <label class="label" style="margin-top:14px">Google Maps link <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(optional)</span></label>
+                  <input id="nrMaps" class="input" inputmode="url" placeholder="Paste a Google Maps link…">
+                  <div class="hint">Shows as a live map on the restaurant page.</div>
+                </div>
+                <div class="card-white">
+                  <div class="label">Cuisine</div>
+                  <div class="chip-grid" id="nrCuisine"></div>
+                  <div class="label" style="margin-top:14px">Seating</div>
+                  <div class="chip-grid" id="nrSeating"></div>
+                  <label class="label" style="margin-top:14px">Opening hours</label>
+                  <input id="nrHours" class="input" placeholder="e.g. 11:00 AM – 11:00 PM" maxlength="40">
+                  <label class="label" style="margin-top:14px">City / area</label>
+                  <input id="nrCity" class="input" value="Abu Dhabi, UAE" placeholder="e.g. Dubai, JBR" maxlength="60">
+                  <div class="hint">Pins the map correctly when the link is a short goo.gl URL.</div>
+                </div>
+                <div class="card-white">
+                  <div class="label">Your visit</div>
+                  <div class="nr-visit-grid">
+                    <div>
+                      <div class="nr-sub">Party size</div>
+                      <div class="stepper">
+                        <button class="step-btn" id="nrPartyMinus" type="button">−</button>
+                        <b id="nrPartyVal">2</b>
+                        <button class="step-btn" id="nrPartyPlus" type="button">+</button>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="nr-sub">Total bill (AED)</div>
+                      <input id="nrBill" class="input" inputmode="numeric" placeholder="e.g. 180">
+                    </div>
+                  </div>
+                  <div class="hint" id="nrPerPerson">Per person: —</div>
+                  <div class="label" style="margin-top:14px">Wait for food</div>
+                  <div class="chip-grid" id="nrWait"></div>
+                  <div class="label" style="margin-top:14px">Languages staff spoke</div>
+                  <div class="chip-grid" id="nrLang"></div>
+                  <div class="label" style="margin-top:14px">Accessibility</div>
+                  <div class="chip-grid" id="nrAccess"></div>
+                </div>
+                <div class="card-white">
+                  <div class="label">Good to know</div>
+                  <div class="chip-grid" id="nrTags"></div>
+                </div>
+                <div class="card-white">
+                  <div class="label">Who went?</div>
+                  <div class="chip-grid" id="nrWho"></div>
+                  <div class="label" style="margin-top:14px">Family ratings</div>
+                  <div id="nrRatings" class="nr-ratings"></div>
+                  <label class="label" style="margin-top:14px">What stood out? <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(shared)</span></label>
+                  <textarea id="nrComment" class="textarea" placeholder="One short note the whole family agrees on…"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="review-foot">
+              <button class="btn-ghost" id="nrClear" style="flex:1">Clear</button>
+              <button class="btn-primary accent" id="nrSubmit" style="flex:1.6">Add restaurant • <span id="nrAvg">—</span></button>
+            </div>
+            <nav class="bottom-nav">
+              <button class="nav-item" data-nav="home"><i data-lucide="compass" style="width:17px;height:17px"></i> Discover</button>
+              <button class="nav-center" data-nav="ai" aria-label="Family AI"><span class="nav-icon"><i data-lucide="bot" style="width:13px;height:13px"></i></span><span>AI</span></button>
+              <button class="nav-item on" data-nav="reviews"><i data-lucide="star" style="width:17px;height:17px"></i> Reviews</button>
+              <button class="nav-item" data-nav="family"><i data-lucide="users" style="width:17px;height:17px"></i> Family</button>
+            </nav>
+          </div>
+
+          <!-- SCREEN 5 — AI ASSISTANT -->
+          <div class="screen" id="screen-ai">
+            <div class="ai-header">
+              <div style="display:flex; align-items:center; gap:12px">
+                <div style="display:flex; align-items:center; gap:9px; flex:1; min-width:0; flex-wrap:wrap">
+                  <h2 style="margin:0"><span><i data-lucide="bot" style="width:18px;height:18px"></i></span> Family AI</h2>
+                </div>
+              </div>
+              <p>Select who's eating. Allergies first, preferences second.</p>
+            </div>
+            <div class="screen-scroll">
+              <div class="ai-body">
+                <div>
+                  <div class="label">Who's eating with you?</div>
+                  <div class="eater-grid" id="eaterGrid"></div>
+                  <div id="eaterEmpty" style="font-size:12.5px; color:#8B8B97; font-weight:600; background:#fff; border:1.5px dashed #E0DDD8; padding:12px; border-radius:14px; display:none">No family members — add them in <b style="color:#111116">Family</b> or we’ll recommend for a general family.</div>
+                </div>
+
+                <div class="ai-input-card">
+                  <label class="label" style="margin:0">What are you looking for?</label>
+                  <textarea id="aiInput" class="ai-textarea" placeholder="Find us somewhere close that isn't too expensive and has outdoor seating..."></textarea>
+                  <button class="btn-primary" id="aiSend"><i data-lucide="sparkles" style="width:16px;height:16px"></i> Find best match</button>
+                </div>
+
+                <div id="aiResults"></div>
+              </div>
+            </div>
+            <nav class="bottom-nav">
+              <button class="nav-item" data-nav="home"><i data-lucide="compass" style="width:17px;height:17px"></i> Discover</button>
+              <button class="nav-center on" data-nav="ai" id="aiFab2" aria-label="Family AI"><span class="nav-icon"><i data-lucide="bot" style="width:13px;height:13px"></i></span><span>AI</span></button>
+              <button class="nav-item" data-nav="reviews"><i data-lucide="star" style="width:17px;height:17px"></i> Reviews</button>
+              <button class="nav-item" data-nav="family"><i data-lucide="users" style="width:17px;height:17px"></i> Family</button>
+            </nav>
+          </div>
+
+          <!-- FILTER SHEET (also used as modal backdrop host) -->
+          <div class="modal-backdrop" id="filterSheet">
+            <div class="sheet" style="max-height:88%">
+              <div class="sheet-head">
+                <b>Filters</b>
+                <button class="icon-btn" id="closeFilters"><i data-lucide="x" style="width:16px;height:16px"></i></button>
+              </div>
+              <div class="sheet-body">
+                <div>
+                  <div class="label">Distance</div>
+                  <div style="display:flex; gap:8px">
+                    <button class="price-chip on" data-filter-dist="any">Any</button>
+                    <button class="price-chip" data-filter-dist="walk">Walking • &lt;1 km</button>
+                    <button class="price-chip" data-filter-dist="close">&lt;3 km</button>
+                  </div>
+                </div>
+                <div>
+                  <div class="label">Price / person</div>
+                  <div class="price-row">
+                    <button class="price-chip" data-filter-price="cheap">Under AED 50</button>
+                    <button class="price-chip" data-filter-price="mid">AED 50–100</button>
+                    <button class="price-chip" data-filter-price="any">Any</button>
+                  </div>
+                </div>
+                <div>
+                  <div class="label">Rating</div>
+                  <div class="price-row">
+                    <button class="price-chip" data-filter-rating="any">Any</button>
+                    <button class="price-chip" data-filter-rating="4">4.5★+</button>
+                    <button class="price-chip" data-filter-rating="4.3">4.3★+</button>
+                  </div>
+                </div>
+                <div>
+                  <div class="label">Cuisine</div>
+                  <div class="chip-grid" id="filterCuisines"></div>
+                </div>
+                <div>
+                  <div class="label">Dietary / seating</div>
+                  <div class="chip-grid" id="filterDietary"></div>
+                </div>
+              </div>
+              <div class="sheet-foot">
+                <button class="btn-ghost" id="clearFilters" style="flex:1">Clear</button>
+                <button class="btn-primary" id="applyFilters" style="flex:1.6">Apply filters</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- MEMBER SHEET -->
+          <div class="modal-backdrop" id="memberSheet">
+            <div class="sheet">
+              <div class="sheet-head">
+                <b id="memberSheetTitle">Add family member</b>
+                <button class="icon-btn" id="closeMemberSheet"><i data-lucide="x" style="width:16px;height:16px"></i></button>
+              </div>
+              <div class="sheet-body">
+                <div>
+                  <label class="label">Member name</label>
+                  <input id="memberNameInput" class="input" placeholder="e.g. Mom, Dad, Owais, Sara">
+                </div>
+                <div>
+                  <div class="label" style="display:flex; align-items:center; gap:8px"><span class="dot req"></span> Dietary requirements <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(hard — must have)</span></div>
+                  <div class="chip-grid" id="dietaryGrid"></div>
+                  <div class="hint">Allergic to something? Pick it under Allergies below — we exclude it automatically.</div>
+                </div>
+                <div>
+                  <div class="label" style="display:flex; align-items:center; gap:8px"><span class="dot req" style="background:#111116"></span> Allergies <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(hard — cannot have)</span></div>
+                  <div class="chip-grid" id="allergyGrid"></div>
+                </div>
+                <div>
+                  <div class="label" style="display:flex; align-items:center; gap:8px"><span class="dot pref"></span> Dining preferences <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(soft — venue & vibe)</span></div>
+                  <div class="chip-grid" id="prefGrid"></div>
+                </div>
+                <div>
+                  <div class="label" style="display:flex; align-items:center; gap:8px"><span class="dot pref"></span> Personal tastes <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(soft — personal)</span></div>
+                  <div class="chip-grid" id="tasteGrid"></div>
+                </div>
+              </div>
+              <div class="sheet-foot">
+                <button class="btn-ghost" id="deleteMemberBtn" style="display:none; flex:1; border-color:#E8C48A; color:#9B1C14">Remove</button>
+                <button class="btn-primary" id="saveMemberBtn" style="flex:1.6">Save member</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === Mobile detect — drop phone-frame chrome on real devices (punch, side buttons, fake statusbar) ===
+(function(){
+  try{
+    var ua=navigator.userAgent||"";
+    var isUA=/Mobi|Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    var isTouch=(("ontouchstart" in window)||navigator.maxTouchPoints>0)&&Math.min(screen.width||9999,screen.height||9999)<920;
+    if(isUA||isTouch) document.body.classList.add("is-mobile");
+  }catch(e){}
+})();
+// === OpenAI — GPT-4o mini (demo: key in frontend, move to backend proxy for production) ===
+const SUPABASE_URL = "https://iyhprlkmaynrizgvksne.supabase.co";
+const SUPABASE_ANON = "sb_publishable_la_0gE6zPSS3K8OBB-gSWg_OYOcSBoy";
+const OPENAI_API_KEY = ""; // redacted — was blocked by GitHub secret scanning; prototype falls back to local ranking
+const OPENAI_MODEL = "gpt-4o-mini";
+const OPENAI_ENABLED = !!OPENAI_API_KEY && OPENAI_API_KEY.startsWith("sk-");
+
+const DIETARY = ["Vegetarian","Vegan","Gluten-free","Halal","Other"];
+const ALLERGIES = ["Gluten","Nuts","Dairy","Seafood","Eggs","Shellfish","Other"];
+const DINING_PREFS = ["Outdoor seating","Quiet","Cheap","Fast service","Family friendly","Kids menu"];
+const TASTE_PREFS = ["Large portions","Good desserts"];
+const PREFS = [...DINING_PREFS, ...TASTE_PREFS];
+const CUISINES = ["Turkish","Japanese","Italian","Moroccan","Cafe","French","Lebanese","Mexican"];
+const FILTER_DIETARY = ["Vegetarian options","Halal","Gluten-free","Outdoor seating","Family friendly","Kids menu","Under AED 50","English"];
+
+let restaurants = [
+  {
+    id:"anatolia",
+    name:"Anatolia Kitchen",
+    cuisine:"Turkish",
+    rating:4.7,
+    price:"AED 25–50",
+    priceNum:38,
+    distance:"0.8 km",
+    distanceNum:0.8,
+    wait:"~15 min",
+    waitNum:15,
+    tags:["Vegetarian options","Outdoor seating","Under AED 50","Family friendly","Halal","Kids menu","English"],
+    dietary:["Vegetarian","Halal","Gluten-free"],
+    seating:["Indoor","Outdoor"],
+    languages:["English","Arabic","Turkish"],
+    accessibility:["Wheelchair accessible"],
+    image:"https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format&fit=crop&q=80",
+    desc:"Wood-fired kebabs, meze and pide in a courtyard with fairy lights. Loved by travelling families for generous portions and fast, friendly service.",
+    hours:"11:00 AM – 11:00 PM",
+    address:"Caferağa, Moda Cd. 23, Kadıköy",
+    lat:"40.983 • 29.029"
+  },
+  {
+    id:"sakura",
+    name:"Sakura Sushi",
+    cuisine:"Japanese",
+    rating:4.6,
+    price:"AED 40–80",
+    priceNum:60,
+    distance:"1.2 km",
+    distanceNum:1.2,
+    wait:"~20 min",
+    waitNum:20,
+    tags:["Gluten-free","Quiet","Family friendly","English","Under AED 100"],
+    dietary:["Gluten-free","Halal"],
+    seating:["Indoor"],
+    languages:["English","Japanese","Arabic"],
+    accessibility:["Wheelchair accessible"],
+    image:"https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&auto=format&fit=crop&q=80",
+    desc:"Minimal, calm sushi bar with a kids' bento and excellent vegetarian rolls. Great for a quiet family dinner.",
+    hours:"12:00 PM – 10:30 PM",
+    address:"Fenerbahçe, Bağdat Cd. 42, Kadıköy",
+    lat:"40.972 • 29.041"
+  },
+  {
+    id:"nonna",
+    name:"Nonna's Table",
+    cuisine:"Italian",
+    rating:4.8,
+    price:"AED 35–60",
+    priceNum:48,
+    distance:"0.4 km",
+    distanceNum:0.4,
+    wait:"~10 min",
+    waitNum:10,
+    tags:["Vegetarian options","Outdoor seating","Family friendly","Kids menu","Good desserts","Under AED 50"],
+    dietary:["Vegetarian","Halal"],
+    seating:["Indoor","Outdoor"],
+    languages:["English","Italian","Arabic"],
+    accessibility:["Wheelchair accessible","High chairs"],
+    image:"https://images.unsplash.com/photo-1515669097368-22e68427d265?w=800&auto=format&fit=crop&q=80",
+    desc:"Hand-made pasta, wood oven pizza and a garden terrace. Loud, joyful and built for big families.",
+    hours:"10:00 AM – 11:00 PM",
+    address:"Moda, Ferit Tek Sk. 12, Kadıköy",
+    lat:"40.985 • 29.024"
+  },
+  {
+    id:"marrakech",
+    name:"Marrakech Spice",
+    cuisine:"Moroccan",
+    rating:4.5,
+    price:"AED 30–55",
+    priceNum:42,
+    distance:"2.1 km",
+    distanceNum:2.1,
+    wait:"~25 min",
+    waitNum:25,
+    tags:["Halal","Vegetarian options","Family friendly","Large portions","English"],
+    dietary:["Vegetarian","Halal","Vegan"],
+    seating:["Indoor","Outdoor"],
+    languages:["English","Arabic","French"],
+    accessibility:["Wheelchair accessible"],
+    image:"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+    desc:"Tagines, couscous and mint tea on low banquettes. Spiced but kid-friendly — staff will tone heat down.",
+    hours:"11:30 AM – 10:00 PM",
+    address:"Acıbadem, Fatih Sk. 8, Üsküdar",
+    lat:"40.998 • 29.055"
+  },
+  {
+    id:"green",
+    name:"The Green Spoon",
+    cuisine:"Cafe",
+    rating:4.4,
+    price:"AED 20–40",
+    priceNum:30,
+    distance:"0.6 km",
+    distanceNum:0.6,
+    wait:"~8 min",
+    waitNum:8,
+    tags:["Vegetarian options","Vegan options","Gluten-free","Outdoor seating","Cheap","Good desserts"],
+    dietary:["Vegetarian","Vegan","Gluten-free","Dairy-free"],
+    seating:["Outdoor"],
+    languages:["English","Arabic"],
+    accessibility:["Wheelchair accessible"],
+    image:"https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&auto=format&fit=crop&q=80",
+    desc:"All-day brunch, gluten-free bakery and a shaded terrace. Fast service, very high family match for mixed diets.",
+    hours:"08:00 AM – 06:00 PM",
+    address:"Moda, Cem Sk. 5, Kadıköy",
+    lat:"40.981 • 29.025"
+  },
+  {
+    id:"petite",
+    name:"La Petite Bistro",
+    cuisine:"French",
+    rating:4.3,
+    price:"AED 50–90",
+    priceNum:70,
+    distance:"1.8 km",
+    distanceNum:1.8,
+    wait:"~18 min",
+    waitNum:18,
+    tags:["Quiet","Outdoor seating","Good desserts","English"],
+    dietary:["Vegetarian"],
+    seating:["Indoor","Outdoor"],
+    languages:["English","French"],
+    accessibility:["Limited access"],
+    image:"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
+    desc:"Small French bistro with a great dessert trolley. Better for couples than large noisy families — intimate and quiet.",
+    hours:"06:00 PM – 11:00 PM",
+    address:"Kalamış, Fener Cd. 18, Kadıköy",
+    lat:"40.965 • 29.035"
+  },
+  {
+    id:"harbor",
+    name:"Harbor & Hearth",
+    cuisine:"Lebanese",
+    rating:4.9,
+    price:"AED 30–65",
+    priceNum:48,
+    distance:"1.0 km",
+    distanceNum:1.0,
+    wait:"~12 min",
+    waitNum:12,
+    tags:["Halal","Vegetarian options","Family friendly","Kids menu","Large portions","Under AED 50"],
+    dietary:["Vegetarian","Halal","Gluten-free"],
+    seating:["Indoor","Outdoor"],
+    languages:["English","Arabic"],
+    accessibility:["Wheelchair accessible","High chairs"],
+    image:"https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80",
+    desc:"Lebanese sharing plates, charcoal grills and a kids' play corner. Consistently top-rated by families.",
+    hours:"11:00 AM – 12:00 AM",
+    address:"Caddebostan, Bağdat Cd. 102, Kadıköy",
+    lat:"40.970 • 29.045"
+  },
+  {
+    id:"luna",
+    name:"Casa Luna",
+    cuisine:"Mexican",
+    rating:4.2,
+    price:"AED 25–45",
+    priceNum:35,
+    distance:"2.4 km",
+    distanceNum:2.4,
+    wait:"~22 min",
+    waitNum:22,
+    tags:["Vegetarian options","Family friendly","Fast service","Cheap"],
+    dietary:["Vegetarian"],
+    seating:["Indoor"],
+    languages:["English","Spanish"],
+    accessibility:["Wheelchair accessible"],
+    image:"https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=800&auto=format&fit=crop&q=80",
+    desc:"Tacos, quesadillas and churros in a colourful, noisy room. Kids love it — fast, cheap, generous.",
+    hours:"12:00 PM – 11:00 PM",
+    address:"Erenköy, Şair Arşi Cd. 11, Kadıköy",
+    lat:"40.975 • 29.075"
+  }
+];
+
+let familyReviews = [
+  {
+    id:"r1",
+    restaurantId:"anatolia",
+    familyName:"The Ahmed Family",
+    overall:4.8,
+    createdAt:"2 days ago",
+    members:[
+      {name:"Dad", rating:5, comment:"Great food and fast service. Kebabs were perfect.", tags:["Great food","Fast service"]},
+      {name:"Mom", rating:5, comment:"Really liked the outdoor seating — shaded and quiet.", tags:["Outdoor seating","Quiet"]},
+      {name:"Omar", rating:4, comment:"Food was good, a bit spicy for me.", tags:["Good portions"]}
+    ]
+  },
+  {
+    id:"r2",
+    restaurantId:"anatolia",
+    familyName:"The Liu Family",
+    overall:4.3,
+    createdAt:"1 week ago",
+    members:[
+      {name:"Mom", rating:4, comment:"Lovely meze, great for vegetarians.", tags:["Vegetarian options"]},
+      {name:"Dad", rating:5, comment:"Pide was amazing. Will come again.", tags:["Great food"]},
+    ]
+  },
+  {
+    id:"r3",
+    restaurantId:"nonna",
+    familyName:"The Bennett Family",
+    overall:5,
+    createdAt:"3 days ago",
+    members:[
+      {name:"Dad", rating:5, comment:"Best pizza in Kadıköy. Kids loved the garden.", tags:["Family friendly","Outdoor seating"]},
+      {name:"Mom", rating:5, comment:"Desserts are incredible.", tags:["Good desserts"]},
+      {name:"Ava", rating:5, comment:"I had 3 slices!", tags:["Large portions"]},
+    ]
+  },
+  {
+    id:"r4",
+    restaurantId:"green",
+    familyName:"The Khan Family",
+    overall:4.6,
+    createdAt:"5 days ago",
+    members:[
+      {name:"Sara", rating:5, comment:"Finally a place with real gluten-free bread.", tags:["Gluten-free","Good desserts"]},
+      {name:"Mom", rating:4, comment:"Nice and quiet for breakfast.", tags:["Quiet","Cheap"]},
+    ]
+  },
+  {
+    id:"r5",
+    restaurantId:"harbor",
+    familyName:"The Okafor Family",
+    overall:4.9,
+    createdAt:"Yesterday",
+    members:[
+      {name:"Dad", rating:5, comment:"Sharing plates perfect for our big family.", tags:["Large portions","Family friendly"]},
+      {name:"Mom", rating:5, comment:"Kids menu saved us.", tags:["Kids menu"]},
+      {name:"Chidi", rating:5, comment:"Hummus best ever", tags:["Great food"]},
+    ]
+  }
+];
+
+let state = {
+  family:{name:"", members:[]},
+  currentRestaurantId:"anatolia",
+  search:"",
+  quick:"all",
+  filters:{dist:"any", price:"any", rating:"any", cuisines:[], dietary:[]},
+  editingMemberId:null,
+  draft:{name:"", dietary:[], allergies:[], prefs:[]},
+  nr:null,
+  nrFresh:true,
+  iw:null,
+  selectedEaters:new Set(),
+  aiQuery:"",
+};
+
+const COLORS = ["#3E6B57","#5A7D6B","#B7791F","#7A9B8A","#8AA399","#A3B25B","#2F3D36"];
+function avatarColor(i){return COLORS[i % COLORS.length]}
+
+// Pop-up notifications removed — toast() is a silent no-op so all call sites keep working.
+function toast(){}
+function stars(n){
+  let s=""; for(let i=1;i<=5;i++) s+= i<=Math.round(n) ? "★" : "☆";
+  return s;
+}
+function renderSetup(){
+  const list=document.getElementById("membersList");
+  const empty=document.getElementById("emptyMembers");
+  const count=document.getElementById("memberCount");
+  count.textContent=String(state.family.members.length);
+  // remove old rows
+  list.querySelectorAll(".member-row").forEach(e=>e.remove());
+  if(state.family.members.length===0){
+    empty.style.display="block";
+  } else {
+    empty.style.display="none";
+    state.family.members.forEach((m,idx)=>{
+      const row=document.createElement("div");
+      row.className="member-row";
+      const req = m.dietary.length ? m.dietary.slice(0,2).join(" • ") : "";
+      const all = m.allergies.length ? "Allergy: "+m.allergies.slice(0,2).join(", ") : "";
+      const pref = m.prefs.length ? m.prefs.slice(0,2).join(" • ") : "";
+      const sub = [req, all, pref].filter(Boolean).join("  •  ") || "No requirements — tap to edit";
+      row.innerHTML=`
+        <div class="member-avatar" style="background:${avatarColor(idx)}">${(m.name||"?").slice(0,1).toUpperCase()}</div>
+        <div class="member-meta"><b>${m.name||"Unnamed"}</b><span>${sub}</span></div>
+        <button class="icon-btn" data-edit="${m.id}" style="width:32px;height:32px"><i data-lucide="pencil" style="width:14px;height:14px"></i></button>
+      `;
+      row.querySelector(`[data-edit="${m.id}"]`).addEventListener("click",()=>openMemberSheet(m.id));
+      row.addEventListener("click",(e)=>{ if(e.target.closest("button")) return; openMemberSheet(m.id); });
+      list.appendChild(row);
+    });
+  }
+  lucide.createIcons();
+  const greet=document.getElementById("greeting");
+  const hr=new Date().getHours();
+  const g = hr<12 ? "Good morning" : hr<18 ? "Good afternoon" : "Good evening";
+  greet.textContent = state.family.name ? `${g}, ${state.family.name}` : `${g}`;
+  renderEaters();
+}
+
+function openMemberSheet(id){
+  state.editingMemberId=id;
+  const m = id ? state.family.members.find(x=>x.id===id) : null;
+  if(m){ state.draft={name:m.name, dietary:[...m.dietary], allergies:[...m.allergies], prefs:[...m.prefs]}; }
+  else { state.draft={name:"", dietary:[], allergies:[], prefs:[]}; }
+  document.getElementById("memberSheetTitle").textContent = m ? `Edit ${m.name||"member"}` : "Add family member";
+  document.getElementById("memberNameInput").value=state.draft.name;
+  document.getElementById("deleteMemberBtn").style.display = m ? "block" : "none";
+  renderChipGrids();
+  document.getElementById("memberSheet").classList.add("open");
+}
+function closeMemberSheet(){ document.getElementById("memberSheet").classList.remove("open"); state.editingMemberId=null; }
+function renderChipGrids(){
+  const d=document.getElementById("dietaryGrid");
+  const a=document.getElementById("allergyGrid");
+  const p=document.getElementById("prefGrid");
+  const t=document.getElementById("tasteGrid");
+  d.innerHTML=""; a.innerHTML=""; p.innerHTML=""; if(t) t.innerHTML="";
+  DIETARY.forEach(v=>{
+    const b=document.createElement("button");
+    b.className="chip req"+(state.draft.dietary.includes(v)?" on":"");
+    b.textContent=v;
+    b.addEventListener("click",()=>{ toggle(state.draft.dietary,v); renderChipGrids(); });
+    d.appendChild(b);
+  });
+  ALLERGIES.forEach(v=>{
+    const b=document.createElement("button");
+    b.className="chip allergy"+(state.draft.allergies.includes(v)?" on":"");
+    b.textContent=v;
+    b.addEventListener("click",()=>{ toggle(state.draft.allergies,v); renderChipGrids(); });
+    a.appendChild(b);
+  });
+  DINING_PREFS.forEach(v=>{
+    const b=document.createElement("button");
+    b.className="chip pref"+(state.draft.prefs.includes(v)?" on":"");
+    b.textContent=v;
+    b.addEventListener("click",()=>{ toggle(state.draft.prefs,v); renderChipGrids(); });
+    p.appendChild(b);
+  });
+  if(t) TASTE_PREFS.forEach(v=>{
+    const b=document.createElement("button");
+    b.className="chip pref"+(state.draft.prefs.includes(v)?" on":"");
+    b.textContent=v;
+    b.addEventListener("click",()=>{ toggle(state.draft.prefs,v); renderChipGrids(); });
+    t.appendChild(b);
+  });
+}
+function toggle(arr, v){ const i=arr.indexOf(v); if(i>=0) arr.splice(i,1); else arr.push(v); }
+
+function saveMember(){
+  const name=document.getElementById("memberNameInput").value.trim() || `Member ${state.family.members.length+1}`;
+  const data={name, dietary:[...state.draft.dietary], allergies:[...state.draft.allergies], prefs:[...state.draft.prefs]};
+  const isEdit=!!state.editingMemberId;
+  if(isEdit){
+    const idx=state.family.members.findIndex(x=>x.id===state.editingMemberId);
+    state.family.members[idx]={...state.family.members[idx], ...data};
+  } else {
+    if(state.family.members.length>=10){ toast("Max 10 members for demo"); return; }
+    const id="m"+Date.now()+Math.random().toString(36).slice(2,6);
+    state.family.members.push({id, ...data});
+    // autosave: new members are automatically selected for AI
+    state.selectedEaters.add(id);
+  }
+  closeMemberSheet(); renderSetup(); renderEaters(); renderHome(); updateHomeFilters();
+}
+function deleteMember(){
+  if(!state.editingMemberId) return;
+  state.family.members=state.family.members.filter(x=>x.id!==state.editingMemberId);
+  // also remove from eaters
+  state.selectedEaters.delete(state.editingMemberId);
+  closeMemberSheet(); renderSetup(); renderEaters();
+  toast("Member removed");
+}
+
+// HOME
+function updateHomeFilters(){
+  document.getElementById("filterCuisines").innerHTML="";
+  CUISINES.forEach(c=>{
+    const b=document.createElement("button");
+    b.className="chip"+(state.filters.cuisines.includes(c)?" on":"");
+    b.textContent=c;
+    b.addEventListener("click",()=>{ toggle(state.filters.cuisines,c); updateHomeFilters(); });
+    document.getElementById("filterCuisines").appendChild(b);
+  });
+  document.getElementById("filterDietary").innerHTML="";
+  FILTER_DIETARY.forEach(v=>{
+    const b=document.createElement("button");
+    b.className="chip"+(state.filters.dietary.includes(v)?" on":"");
+    b.textContent=v;
+    b.addEventListener("click",()=>{ toggle(state.filters.dietary,v); updateHomeFilters(); });
+    document.getElementById("filterDietary").appendChild(b);
+  });
+  // price/dist/rating chips UI sync
+  document.querySelectorAll("[data-filter-dist]").forEach(b=> b.classList.toggle("on", b.dataset.filterDist===state.filters.dist));
+  document.querySelectorAll("[data-filter-price]").forEach(b=> b.classList.toggle("on", b.dataset.filterPrice===state.filters.price));
+  document.querySelectorAll("[data-filter-rating]").forEach(b=> b.classList.toggle("on", b.dataset.filterRating===state.filters.rating));
+}
+function getFiltered(){
+  let list=[...restaurants];
+  const q=(state.search||"").toLowerCase().trim();
+  const quick=state.quick;
+  if(q){
+    list=list.filter(r=> (r.name+" "+r.cuisine+" "+r.tags.join(" ")+" "+r.desc).toLowerCase().includes(q));
+  }
+  if(quick && quick!=="all"){
+    const qq=quick.toLowerCase();
+    list=list.filter(r=> (r.tags.join(" ")+" "+r.cuisine+" "+r.price).toLowerCase().includes(qq));
+    // top-rated match first so each filter surfaces its own best pick
+    list.sort((a,b)=> b.rating-a.rating);
+  }
+  // distance
+  if(state.filters.dist==="walk") list=list.filter(r=>r.distanceNum<1);
+  if(state.filters.dist==="close") list=list.filter(r=>r.distanceNum<3);
+  if(state.filters.price==="cheap") list=list.filter(r=>r.priceNum<=50);
+  if(state.filters.price==="mid") list=list.filter(r=>r.priceNum>50 && r.priceNum<=100);
+  if(state.filters.rating==="4") list=list.filter(r=>r.rating>=4.5);
+  if(state.filters.rating==="4.3") list=list.filter(r=>r.rating>=4.3);
+  if(state.filters.cuisines.length) list=list.filter(r=> state.filters.cuisines.includes(r.cuisine));
+  if(state.filters.dietary.length) list=list.filter(r=> state.filters.dietary.every(d=> r.tags.map(t=>t.toLowerCase()).join(" ").includes(d.toLowerCase().split(" ")[0])));
+  return list;
+}
+function renderHome(){
+  renderSetup();
+  const listEl=document.getElementById("restaurantList");
+  const filtered=getFiltered();
+  listEl.innerHTML="";
+  if(filtered.length===0){
+    listEl.innerHTML=`<div class="ai-empty"><b>No restaurants match</b><span>Try clearing filters or searching differently. The AI can still suggest from the full database.</span><button class="btn-ghost" style="margin-top:12px" id="clearEmpty">Clear filters</button></div>`;
+    listEl.querySelector("#clearEmpty")?.addEventListener("click",()=>{ clearFilters(); renderHome(); });
+    lucide.createIcons(); return;
+  }
+  filtered.forEach(r=>{
+    const card=document.createElement("div");
+    card.className="r-card";
+    card.dataset.id=r.id;
+    const tags = r.tags.slice(0,3).map((t,i)=> `<span class="mini-tag ${i===0?'dark':''}">${t}</span>`).join("");
+    card.innerHTML=`
+      <div class="r-img">
+        <img src="${r.image}" alt="${r.name}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${r.id}/800/600'">
+        <div class="r-time"><i data-lucide="clock-3" style="width:12px;height:12px; display:inline-block; vertical-align:middle; margin-right:4px"></i>${r.wait}</div>
+      </div>
+      <div class="r-body">
+        <div class="r-title">
+          <h3>${r.name}</h3>
+          <div class="r-rating"><span>${stars(r.rating)}</span> ${r.rating.toFixed(1)}</div>
+        </div>
+        <div class="r-meta"><b>${r.cuisine}</b> <span class="dotsep"></span> ${r.price} / person <span class="dotsep"></span> ${r.distance}</div>
+        <div class="r-tags">${tags} ${r.tags.length>3?`<span class="mini-tag">+${r.tags.length-3}</span>`:""}</div>
+      </div>
+    `;
+    card.addEventListener("click",()=> openRestaurant(r.id));
+    listEl.appendChild(card);
+  });
+  lucide.createIcons();
+  // quick filters sync
+  document.querySelectorAll("#quickFilters .qchip").forEach(b=> b.classList.toggle("on", b.dataset.q===state.quick));
+}
+
+// DETAIL
+// Turn a pasted Maps link (or plain address) into a keyless embed iframe URL.
+// Returns null for short/unparseable links — detail keeps the placeholder map then.
+function mapsEmbedUrl(r){
+  const raw=((r&&r.mapsUrl)||"").trim();
+  const out=q=>"https://maps.google.com/maps?q="+encodeURIComponent(q)+"&z=16&output=embed";
+  const city=((r&&r.city)||"").trim()||"Abu Dhabi, UAE";
+  const byName=()=> (r&&r.name)? out(r.name+", "+city) : null;
+  try{
+    if(/^https?:\/\//i.test(raw)){
+      const u=new URL(raw);
+      const host=u.hostname.toLowerCase();
+      const okHost = host==="google.com" || host.endsWith(".google.com") ||
+        /^www\.google\.[a-z]{2,}(\.[a-z]{2,})?$/.test(host) ||
+        host==="goo.gl" || host.endsWith(".goo.gl") || host.endsWith(".maps.app.goo.gl");
+      if(!okHost) return null;
+      // official "Embed a map" URL — reuse path+query on a fixed google origin (parser-encoded, safe)
+      if(u.pathname.includes("/embed")) return "https://www.google.com"+u.pathname+u.search;
+      const q=u.searchParams.get("q")||u.searchParams.get("query");
+      if(q) return out(q);
+      let m=u.pathname.match(/\/place\/([^\/]+)/);
+      if(m) return out(decodeURIComponent(m[1].replace(/\+/g," ")));
+      m=u.pathname.match(/\/search\/([^\/]+)/);
+      if(m) return out(decodeURIComponent(m[1].replace(/\+/g," ")));
+      m=u.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if(m) return out(m[1]+","+m[2]);
+      // short links can't be resolved in-browser — look the place up by name instead
+      return byName();
+    }
+    if(raw) return out(raw);
+    // no link: a real street address still embeds; a city + name is next best, else placeholder
+    if(r&&r.address&&r.address!=="See Google Maps link"&&r.address!=="—") return out(r.address);
+    if(r&&((r.city)||"").trim()&&(r.name)) return out(r.name+", "+r.city.trim());
+    return null;
+  }catch(e){ return null; }
+}
+function openRestaurant(id){
+  state.currentRestaurantId=id;
+  const r=restaurants.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById("detailImg").src=r.image;
+  document.getElementById("detailName").textContent=r.name;
+  document.getElementById("detailStars").textContent=stars(r.rating);
+  document.getElementById("detailRating").textContent=r.rating.toFixed(1)+" / 5";
+  document.getElementById("detailSub").textContent=`• ${r.cuisine} • ${r.distance}`;
+  const content=document.getElementById("detailContent");
+  const reviews = familyReviews.filter(x=>x.restaurantId===id);
+  const infoGrid = `
+    <div class="info-grid">
+      <div class="info-card"><small>Price / person</small><b>${r.price}</b><span>Avg. spend</span></div>
+      <div class="info-card"><small>Opening hours</small><b>${r.hours}</b><span>Daily</span></div>
+      <div class="info-card"><small>Average wait</small><b>${r.wait}</b><span>Family avg.</span></div>
+      <div class="info-card"><small>Seating</small><b>${r.seating.join(" + ")}</b><span>${r.seating.includes("Outdoor")?"Garden terrace":"Indoor only"}</span></div>
+      <div class="info-card"><small>Languages</small><b>${r.languages.join(", ")}</b></div>
+      <div class="info-card"><small>Accessibility</small><b>${r.accessibility.join(", ")}</b></div>
+    </div>
+  `;
+  content.innerHTML=`
+    <div class="detail-tagrow">${r.tags.map(t=>`<span class="mini-tag ${["Family friendly","Halal","Vegetarian options"].includes(t)?"green":""}">${t}</span>`).join("")}</div>
+    <div style="font-size:13.5px; line-height:1.6; color:#3A3A45; background:#fff; border:1px solid #ECE9E6; border-radius:18px; padding:14px">${r.desc}</div>
+    <div class="map-card">
+      <div style="padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #F0EDE9">
+        <div style="font-weight:800; font-size:13px; display:flex; align-items:center; gap:8px"><i data-lucide="map-pin" style="width:14px;height:14px; color:var(--sage-dark)"></i> Location</div>
+        <span style="font-size:12px; font-weight:700; color:#2F4A3E; background:var(--mint); padding:5px 9px; border-radius:8px; border:1px solid #A9CFA4">${r.distance} away</span>
+      </div>
+      <div class="map">
+        ${mapsEmbedUrl(r)
+          ? `<iframe title="Map of ${r.name}" src="${mapsEmbedUrl(r)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen style="position:absolute; inset:0; width:100%; height:100%; border:0"></iframe>`
+          : `<div class="map-grid"></div>
+        <div class="map-road" style="left:0; right:28%; top:46%; height:14px; transform:rotate(-1deg)"></div>
+        <div class="map-road" style="left:38%; top:0; bottom:18%; width:14px; transform:rotate(1deg)"></div>
+        <div class="map-road" style="left:12%; top:18%; width:66%; height:10px; border-radius:999px; opacity:0.9"></div>
+        <div class="map-pin"><i data-lucide="map-pin" style="width:14px;height:14px"></i></div>`}
+        <div style="position:absolute; left:12px; bottom:10px; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); padding:7px 10px; border-radius:12px; font-size:11px; font-weight:700; border:1px solid #ECE9E6; max-width:70%">
+          <div style="font-weight:800">${r.address}</div>
+          <div style="color:#8B8B97; font-weight:600">${r.lat} • Open now</div>
+        </div>
+        <div style="position:absolute; right:10px; top:10px; background:var(--sage-dark); color:#fff; padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800">Maps</div>
+      </div>
+      <div style="padding:10px 14px; display:flex; gap:8px">
+        <button class="btn-ghost" style="flex:1; padding:13px; font-size:14px" data-map-open>Open in Maps</button>
+      </div>
+    </div>
+    ${infoGrid}
+    <button class="review-cta" id="reviewCta">
+      <div><b>Review with your family</b><span>${state.family.members.length? state.family.members.length+" members • each rates separately":"Add family members • one collective review"}</span></div>
+      <i><i data-lucide="arrow-right" style="width:18px;height:18px"></i></i>
+    </button>
+    <div id="inlineReview" style="display:none; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; flex-direction:column; gap:12px">
+      <div class="label" style="margin:0">Your ratings</div>
+      <div id="iwRows" class="nr-ratings"></div>
+      <label class="label">Comment <span style="text-transform:none; letter-spacing:0; font-weight:500; color:#ACACB8">(shared, optional)</span></label>
+      <textarea id="iwComment" class="textarea" placeholder="What did the family think?"></textarea>
+      <button class="btn-primary accent" id="iwSubmit">Submit review</button>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:space-between">
+      <div class="section-title"><i data-lucide="users" style="width:16px;height:16px; color:var(--sage-dark)"></i> Family reviews <span style="background:var(--sage-dark); color:#fff; padding:3px 8px; border-radius:8px; font-size:11px">${reviews.length}</span></div>
+      <span style="font-size:12px; color:#8B8B97; font-weight:600">Newest first</span>
+    </div>
+    <div class="family-reviews" id="famReviewsMount"></div>
+  `;
+  const mount=content.querySelector("#famReviewsMount");
+  if(reviews.length===0){
+    mount.innerHTML=`<div class="ai-empty"><b>No family reviews yet</b><span>Be the first family to review ${r.name}. Tap above to create a collective review.</span></div>`;
+  } else {
+    reviews.forEach(fr=>{
+      const el=document.createElement("div");
+      el.className="fam-review";
+      el.innerHTML=`
+        <div class="fam-review-head">
+          <b>${fr.familyName}</b>
+          <span class="fam-pill"><i data-lucide="star" style="width:12px;height:12px; fill:#fff"></i> ${fr.overall.toFixed(1)} / 5</span>
+        </div>
+        <div style="font-size:11px; color:#ACACB8; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px">${fr.createdAt} • ${fr.members.length} opinions • family avg.</div>
+        ${fr.members.map(m=>`
+          <div class="member-review">
+            <div class="mr-head"><b>${m.name}</b><span>${"★".repeat(m.rating)}${"☆".repeat(5-m.rating)}</span></div>
+            ${m.comment?`<div class="mr-comment">“${m.comment}”</div>`:""}
+            ${m.tags?.length?`<div class="mr-tags">${m.tags.map(t=>`<span class="mini-tag" style="font-size:11px; padding:5px 8px">${t}</span>`).join("")}</div>`:""}
+          </div>
+        `).join("")}
+      `;
+      mount.appendChild(el);
+    });
+  }
+  content.querySelector("#reviewCta").addEventListener("click",()=> toggleInlineReview());
+  content.querySelector("#iwSubmit").addEventListener("click",()=> submitInlineReview());
+  content.querySelector("[data-map-open]")?.addEventListener("click",()=>{
+    if(r.mapsUrl){ try{ window.open(r.mapsUrl,"_blank"); }catch(e){ toast("Couldn't open Maps link"); } }
+    else window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent((r.address&&r.address!=="—"?r.address+", ":"")+r.name),"_blank");
+  });
+  lucide.createIcons();
+  showScreen("detail");
+}
+
+let currentNav="home";
+function showScreen(name, nav){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+name).classList.add("active");
+
+  // highlight follows the tapped nav item; detail preserves it, home/ai/setup/review set it
+  if(nav) currentNav=nav;
+  else if(name==="home") currentNav="home";
+  else if(name==="ai") currentNav="ai";
+  else if(name==="setup") currentNav="family";
+  else if(name==="review") currentNav="reviews";
+  // update nav highlights if needed
+  document.querySelectorAll("[data-nav]").forEach(b=>{
+    b.classList.toggle("on", b.dataset.nav===currentNav);
+  });
+  lucide.createIcons();
+}
+
+// NEW RESTAURANT REVIEW (Reviews tab) — add a missing spot with visit facts + family ratings
+const NR_SEATING=["Indoor","Outdoor","Rooftop","Private room"];
+const NR_WAIT=["Under 10 min","~15 min","~25 min","30+ min"];
+const NR_WAIT_NUM={"Under 10 min":8,"~15 min":15,"~25 min":25,"30+ min":35};
+const NR_LANGS=["English","Arabic","Turkish","French","Spanish","Italian","Japanese"];
+const NR_ACCESS=["Wheelchair accessible","High chairs","Step-free entry"];
+const NR_TAGS=["Halal","Vegetarian options","Vegan options","Gluten-free","Outdoor seating","Family friendly","Kids menu","Large portions","Good desserts","Cheap","Quiet","Fast service"];
+function blankNR(){ return {name:"",imgData:"",maps:"",cuisine:"",seating:[],hours:"",city:"Abu Dhabi, UAE",party:2,bill:"",wait:"~15 min",langs:[],access:[],tags:[],who:[],ratings:{},comment:""}; }
+function nrWhoIds(){
+  if(state.family.members.length) return state.nr.who.filter(id=> state.family.members.some(m=>m.id===id));
+  return ["__guest__"];
+}
+function nrMemberName(id){
+  const m=state.family.members.find(x=>x.id===id);
+  return m? m.name : "Guest";
+}
+function openNewReview(){
+  if(!state.nr){ state.nr=blankNR(); state.nrFresh=true; }
+  if(state.nrFresh){ state.nr.who=state.family.members.map(m=>m.id); state.nrFresh=false; }
+  syncNRForm();
+  showScreen("review","reviews");
+}
+function syncNRForm(){
+  if(!document.getElementById("nrCuisine")) return;
+  paintNRChips("nrCuisine",CUISINES,true);
+  paintNRChips("nrSeating",NR_SEATING,false);
+  paintNRChips("nrWait",NR_WAIT,true);
+  paintNRChips("nrLang",NR_LANGS,false);
+  paintNRChips("nrAccess",NR_ACCESS,false);
+  paintNRChips("nrTags",NR_TAGS,false);
+  paintNRWho();
+  document.getElementById("nrPartyVal").textContent=state.nr.party;
+  updatePerPerson();
+  paintNRRatings();
+  updateNRAvg();
+}
+function paintNRChips(elId,options,single){
+  const el=document.getElementById(elId); if(!el) return;
+  const key={nrCuisine:"cuisine",nrSeating:"seating",nrWait:"wait",nrLang:"langs",nrAccess:"access",nrTags:"tags"}[elId];
+  el.innerHTML="";
+  options.forEach(v=>{
+    const sel=state.nr[key];
+    const on=single? sel===v : sel.includes(v);
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="chip"+(on?" on":"");
+    b.textContent=v;
+    b.addEventListener("click",()=>{
+      if(single) state.nr[key]=(state.nr[key]===v?"":v);
+      else toggle(state.nr[key],v);
+      paintNRChips(elId,options,single);
+    });
+    el.appendChild(b);
+  });
+}
+function paintNRWho(){
+  const el=document.getElementById("nrWho"); if(!el) return;
+  el.innerHTML="";
+  if(!state.family.members.length){
+    el.innerHTML=`<div style="font-size:12.5px; color:#8B8B97; font-weight:600">No family members — reviewing as Guest.</div>`;
+    return;
+  }
+  state.family.members.forEach(m=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="chip"+(state.nr.who.includes(m.id)?" on":"");
+    b.textContent=m.name;
+    b.addEventListener("click",()=>{
+      toggle(state.nr.who,m.id);
+      if(!state.nr.who.includes(m.id)) delete state.nr.ratings[m.id];
+      paintNRWho(); paintNRRatings(); updateNRAvg();
+    });
+    el.appendChild(b);
+  });
+}
+function paintNRRatings(){
+  const box=document.getElementById("nrRatings"); if(!box) return;
+  box.innerHTML="";
+  const ids=nrWhoIds();
+  if(state.family.members.length && !ids.length){
+    box.innerHTML=`<div style="font-size:12.5px; color:#8B8B97; font-weight:600">Select who went above.</div>`;
+    return;
+  }
+  ids.forEach(id=>{
+    const name=nrMemberName(id);
+    const idx=Math.max(0,state.family.members.findIndex(m=>m.id===id));
+    const val=state.nr.ratings[id]||0;
+    const row=document.createElement("div");
+    row.className="nr-rate-row";
+    row.innerHTML=`
+      <span class="av" style="background:${avatarColor(idx)}">${name.slice(0,1).toUpperCase()}</span>
+      <b>${name}</b>
+      <span class="mini-stars">${[1,2,3,4,5].map(n=>`<button type="button" class="star-btn ${val>=n?"on":""}" data-star="${n}"><i data-lucide="star" style="width:14px;height:14px"></i></button>`).join("")}</span>
+    `;
+    row.querySelectorAll("[data-star]").forEach(btn=> btn.addEventListener("click",()=>{
+      state.nr.ratings[id]=Number(btn.dataset.star);
+      paintNRRatings(); updateNRAvg();
+    }));
+    box.appendChild(row);
+  });
+  lucide.createIcons();
+}
+function nrAvgVal(){
+  const vals=nrWhoIds().map(id=>state.nr.ratings[id]||0).filter(v=>v>0);
+  if(!vals.length) return 0;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function updateNRAvg(){
+  const el=document.getElementById("nrAvg"); if(!el) return;
+  const avg=nrAvgVal();
+  el.textContent=avg? avg.toFixed(1) : "—";
+}
+function updatePerPerson(){
+  const el=document.getElementById("nrPerPerson"); if(!el) return;
+  const bill=Number(state.nr.bill);
+  if(bill>0 && state.nr.party>0) el.textContent=`Per person: ~AED ${Math.round(bill/state.nr.party)} · ${state.nr.party} people`;
+  else el.textContent="Per person: —";
+}
+function nrDietary(tags){
+  const d=[];
+  if(tags.includes("Vegetarian options")) d.push("Vegetarian");
+  if(tags.includes("Vegan options")) d.push("Vegan");
+  if(tags.includes("Gluten-free")) d.push("Gluten-free");
+  if(tags.includes("Halal")) d.push("Halal");
+  return d;
+}
+function submitNewRestaurant(){
+  const nameEl=document.getElementById("nrName");
+  const name=(nameEl.value||"").trim();
+  if(!name){ toast("Add the restaurant name first"); nameEl.focus(); return; }
+  if(state.family.members.length && !state.nr.who.length){ toast("Pick who went first"); return; }
+  const rated=nrWhoIds().filter(id=>(state.nr.ratings[id]||0)>0);
+  if(!rated.length){ toast("Add at least one family rating"); return; }
+  const avg=rated.reduce((a,id)=>a+state.nr.ratings[id],0)/rated.length;
+  const bill=Number(state.nr.bill);
+  const perPerson=(bill>0 && state.nr.party>0)? Math.round(bill/state.nr.party) : null;
+  const rId="u"+Date.now().toString(36);
+  const comment=(document.getElementById("nrComment").value||"").trim().slice(0,180);
+  const famName=state.family.name||"Your family";
+  restaurants.unshift({
+    id:rId, name, cuisine:state.nr.cuisine||"Other",
+    rating:Math.round(avg*10)/10,
+    price:perPerson? `AED ~${perPerson}` : "AED —", priceNum:perPerson||999,
+    distance:"New", distanceNum:99,
+    wait:state.nr.wait||"~15 min", waitNum:NR_WAIT_NUM[state.nr.wait]||15,
+    tags:["New",...state.nr.tags].slice(0,8),
+    dietary:nrDietary(state.nr.tags),
+    seating:state.nr.seating.length? [...state.nr.seating] : ["Indoor"],
+    languages:[...state.nr.langs], accessibility:[...state.nr.access],
+    image:state.nr.imgData||`https://picsum.photos/seed/${rId}/800/600`,
+    desc:comment||`Added by ${famName}.`,
+    hours:(document.getElementById("nrHours").value||"").trim()||"—",
+    city:state.nr.city.trim(),
+    address:state.nr.city.trim()||"See Google Maps link", lat:"Custom pin",
+    mapsUrl:(document.getElementById("nrMaps").value||"").trim()
+  });
+  familyReviews.unshift({
+    id:"r"+Date.now().toString(36), restaurantId:rId, familyName:famName,
+    overall:Math.round(avg*10)/10, createdAt:"Just now",
+    members:rated.map(id=>({name:nrMemberName(id), rating:state.nr.ratings[id], comment, tags:[]}))
+  });
+  state.currentRestaurantId=rId;
+  sbSaveRestaurant(restaurants[0], familyReviews[0]).then(ok=>{ if(!ok) toast("Saved on this device — offline"); });
+  resetNRForm();
+  renderHome();
+  showScreen("home","home");
+  toast(`${name} added to Discover`);
+}
+function resetNRForm(){
+  state.nr=blankNR(); state.nrFresh=true;
+  ["nrName","nrMaps","nrHours","nrBill","nrComment"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+  const nc=document.getElementById("nrCity"); if(nc) nc.value=state.nr.city;
+  const f=document.getElementById("nrPhoto"); if(f) f.value="";
+  const img=document.getElementById("nrPhotoPreview"); if(img){ img.removeAttribute("src"); img.style.display="none"; }
+  const emp=document.getElementById("nrPhotoEmpty"); if(emp) emp.style.display="flex";
+  if(document.getElementById("nrCuisine")){ state.nr.who=state.family.members.map(m=>m.id); state.nrFresh=false; syncNRForm(); }
+}
+// INLINE RATING on restaurant detail — rate an existing spot without leaving the page
+function toggleInlineReview(){
+  const w=document.getElementById("inlineReview"); if(!w) return;
+  if(w.style.display!=="none"){ w.style.display="none"; return; }
+  state.iw={ratings:{}};
+  const c=document.getElementById("iwComment"); if(c) c.value="";
+  paintInlineRows();
+  w.style.display="flex";
+  lucide.createIcons();
+}
+function iwMemberList(){
+  if(state.family.members.length) return state.family.members.map(m=>({id:m.id,name:m.name}));
+  return [{id:"__guest__",name:"Guest"}];
+}
+function iwMemberName(id){
+  const m=state.family.members.find(x=>x.id===id);
+  return m? m.name : "Guest";
+}
+function paintInlineRows(){
+  const box=document.getElementById("iwRows"); if(!box) return;
+  box.innerHTML="";
+  iwMemberList().forEach(m=>{
+    const idx=Math.max(0,state.family.members.findIndex(x=>x.id===m.id));
+    const val=(state.iw&&state.iw.ratings[m.id])||0;
+    const row=document.createElement("div");
+    row.className="nr-rate-row";
+    row.innerHTML=`
+      <span class="av" style="background:${avatarColor(idx)}">${m.name.slice(0,1).toUpperCase()}</span>
+      <b>${m.name}</b>
+      <span class="mini-stars">${[1,2,3,4,5].map(n=>`<button type="button" class="star-btn ${val>=n?"on":""}" data-star="${n}"><i data-lucide="star" style="width:14px;height:14px"></i></button>`).join("")}</span>
+    `;
+    row.querySelectorAll("[data-star]").forEach(btn=> btn.addEventListener("click",()=>{
+      state.iw.ratings[m.id]=Number(btn.dataset.star);
+      paintInlineRows();
+    }));
+    box.appendChild(row);
+  });
+  lucide.createIcons();
+}
+function submitInlineReview(){
+  if(!state.iw) state.iw={ratings:{}};
+  const ids=Object.keys(state.iw.ratings).filter(id=>state.iw.ratings[id]>0);
+  if(!ids.length){ toast("Tap stars to rate first"); return; }
+  const avg=ids.reduce((a,id)=>a+state.iw.ratings[id],0)/ids.length;
+  const comment=((document.getElementById("iwComment")||{}).value||"").trim().slice(0,180);
+  familyReviews.unshift({
+    id:"r"+Date.now().toString(36), restaurantId:state.currentRestaurantId,
+    familyName:state.family.name||"Your family",
+    overall:Math.round(avg*10)/10, createdAt:"Just now",
+    members:ids.map(id=>({name:iwMemberName(id), rating:state.iw.ratings[id], comment, tags:[]}))
+  });
+  state.iw={ratings:{}};
+  toast(`Family review saved • ${avg.toFixed(1)}★`);
+  sbSaveRestaurant(null, familyReviews[0]).then(ok=>{ if(!ok) toast("Saved on this device — offline"); });
+  openRestaurant(state.currentRestaurantId);
+  setTimeout(()=>{ const s=document.getElementById("detailScroll"); if(s) s.scrollTop=360; },180);
+}
+
+// SUPABASE — cloud source of truth, local seed is the offline fallback
+let sbOnline=false;
+async function sbReq(path, opts={}){
+  const ctrl=new AbortController();
+  const tm=setTimeout(()=>ctrl.abort(),9000);
+  try{
+    const res=await fetch(SUPABASE_URL+"/rest/v1/"+path,{
+      ...opts, signal:ctrl.signal,
+      headers:{ apikey:SUPABASE_ANON, Authorization:"Bearer "+SUPABASE_ANON, "Content-Type":"application/json", ...(opts.headers||{}) }
+    });
+    if(!res.ok) throw new Error("Supabase "+res.status);
+    const txt=await res.text();
+    return txt? JSON.parse(txt) : null;
+  } finally { clearTimeout(tm); }
+}
+function rowToRestaurant(w){
+  return { id:w.id, name:w.name, cuisine:w.cuisine||"", rating:Number(w.rating)||0,
+    price:w.price||"", priceNum:Number(w.price_num)||0,
+    distance:w.distance||"", distanceNum:Number(w.distance_num)||0,
+    wait:w.wait_text||"", waitNum:Number(w.wait_num)||0,
+    tags:w.tags||[], dietary:w.dietary||[], seating:w.seating||[],
+    languages:w.languages||[], accessibility:w.accessibility||[],
+    image:w.image||"", desc:w.descr||"", hours:w.hours||"", city:w.city||"",
+    address:w.address||"", lat:w.lat||"", mapsUrl:w.maps_url||"" };
+}
+function restaurantToRow(r, sortOrder=0){
+  return { id:r.id, name:r.name, cuisine:r.cuisine, rating:r.rating,
+    price:r.price, price_num:r.priceNum, distance:r.distance, distance_num:r.distanceNum,
+    wait_text:r.wait, wait_num:r.waitNum, tags:r.tags, dietary:r.dietary, seating:r.seating,
+    languages:r.languages, accessibility:r.accessibility, image:r.image, descr:r.desc,
+    hours:r.hours, city:r.city||"", address:r.address, lat:r.lat, maps_url:r.mapsUrl||"", sort_order:sortOrder };
+}
+function rowToReview(w){
+  return { id:w.id, restaurantId:w.restaurant_id, familyName:w.family_name,
+    overall:Number(w.overall)||0, createdAt:w.created_at||"",
+    members:(w.members||[]).map(m=>({name:m.name, rating:m.rating, comment:m.comment||"", tags:m.tags||[]})) };
+}
+function reviewToRow(rv){
+  return { id:rv.id, restaurant_id:rv.restaurantId, family_name:rv.familyName,
+    overall:rv.overall, created_at:rv.createdAt, members:rv.members };
+}
+async function syncFromSupabase(){
+  const rows=await sbReq("restaurants?select=*&order=sort_order.asc");
+  if(!Array.isArray(rows)||!rows.length) return false;
+  restaurants=rows.map(rowToRestaurant);
+  try{
+    const rrows=await sbReq("family_reviews?select=*");
+    if(Array.isArray(rrows)) familyReviews=rrows.map(rowToReview);
+  }catch(e){ console.warn("[Supabase] reviews sync failed:", e.message); }
+  sbOnline=true;
+  return true;
+}
+async function sbSaveRestaurant(resto, review){
+  if(!sbOnline) return false;
+  try{
+    if(resto) await sbReq("restaurants",{method:"POST", body:JSON.stringify(restaurantToRow(resto,0))});
+    if(review) await sbReq("family_reviews",{method:"POST", body:JSON.stringify(reviewToRow(review))});
+    return true;
+  }catch(e){ console.warn("[Supabase] save failed, keeping local:", e.message); return false; }
+}
+
+// AI
+function renderEaters(){
+  const grid=document.getElementById("eaterGrid");
+  const empty=document.getElementById("eaterEmpty");
+  grid.innerHTML="";
+  if(state.family.members.length===0){
+    empty.style.display="block";
+    return;
+  }
+  empty.style.display="none";
+  state.family.members.forEach((m,idx)=>{
+    const on=state.selectedEaters.has(m.id);
+    const btn=document.createElement("button");
+    btn.className="eater"+(on?" on":"");
+    btn.innerHTML=`<span class="av" style="background:${avatarColor(idx)}">${m.name.slice(0,1).toUpperCase()}</span> ${m.name} <span style="margin-left:4px; font-size:11px; font-weight:700; opacity:0.7">${m.allergies.length? m.allergies[0] : ""}</span> ${on?'<i data-lucide="check" style="width:14px;height:14px; margin-left:4px"></i>':''}`;
+    btn.addEventListener("click",()=>{
+      if(on) state.selectedEaters.delete(m.id); else state.selectedEaters.add(m.id);
+      renderEaters();
+    });
+    grid.appendChild(btn);
+  });
+  lucide.createIcons();
+}
+function scoreRestaurantsLocally(q, eaters){
+  // deterministic fallback — same logic as before, extracted for GPT fallback
+  return restaurants.map(r=>{
+    let score=50; let reasons=[]; let blocks=[]; let hardFail=false;
+    eaters.forEach(m=>{
+      m.dietary.forEach(req=>{
+        const need=req.toLowerCase(); let ok=false;
+        if(need==="vegetarian") ok=r.dietary.includes("Vegetarian")|| r.tags.includes("Vegetarian options");
+        else if(need==="vegan") ok=r.dietary.includes("Vegan")|| r.tags.includes("Vegan options");
+        else if(need==="gluten-free") ok=r.dietary.includes("Gluten-free")|| r.tags.includes("Gluten-free");
+        else if(need==="halal") ok=r.dietary.includes("Halal")|| r.tags.includes("Halal");
+        else if(need==="no seafood"||need==="no nuts"||need==="dairy-free") ok=true;
+        else ok=r.dietary.join(" ").toLowerCase().includes(need.replace("no ",""))|| r.tags.join(" ").toLowerCase().includes(need);
+        if(!ok){ hardFail=true; blocks.push(`${req} needed for ${m.name} — not found`); score-=28; } else { score+=8; reasons.push(`✓ ${req} for ${m.name}`); }
+      });
+      m.allergies.forEach(al=>{
+        const alLower=al.toLowerCase();
+        if(alLower==="gluten" && !r.dietary.includes("Gluten-free") && !r.tags.join(" ").toLowerCase().includes("gluten-free")){ hardFail=true; blocks.push(`Gluten allergy for ${m.name}`); score-=30; }
+        else if(alLower==="nuts" && r.name==="Casa Luna"){ hardFail=true; blocks.push(`Nuts allergy for ${m.name}`); score-=30; }
+        else if(alLower==="dairy" && r.dietary.includes("Dairy-free")){ score+=4; reasons.push(`✓ Dairy-free for ${m.name}`); }
+        else if(alLower==="seafood" && r.cuisine==="Japanese"){ hardFail=true; blocks.push(`Seafood allergy for ${m.name} — sushi`); score-=30; }
+        else if(alLower==="shellfish" && r.cuisine==="Japanese"){ hardFail=true; blocks.push(`Shellfish allergy for ${m.name}`); score-=30; }
+        else { reasons.push(`✓ No ${al} issue for ${m.name}`); score+=2; }
+      });
+    });
+    if(q){
+      if(q.includes("cheap")||q.includes("inexpensive")||q.includes("not too expensive")||q.includes("under")){ if(r.priceNum<=45){score+=12; reasons.push("✓ Within your price range");} else score-=8; }
+      if(q.includes("close")||q.includes("near")||q.includes("walking")){ if(r.distanceNum<=1){score+=14; reasons.push(`✓ ${r.distance} away`);} else if(r.distanceNum<=2) score+=4; else score-=6; }
+      if(q.includes("outdoor")||q.includes("terrace")||q.includes("garden")){ if(r.tags.includes("Outdoor seating")){score+=10; reasons.push("✓ Outdoor seating");} else score-=4; }
+      if(q.includes("quiet")){ if(r.tags.includes("Quiet")){score+=8; reasons.push("✓ Quiet");} else score-=2; }
+      if(q.includes("family")||q.includes("kids")){ if(r.tags.includes("Family friendly")||r.tags.includes("Kids menu")){score+=10; reasons.push("✓ Family friendly • Kids menu");} }
+      if(q.includes("vegetarian")){ if(r.tags.includes("Vegetarian options")||r.dietary.includes("Vegetarian")){score+=10; reasons.push("✓ Vegetarian options");} }
+      if(q.includes("gluten")){ if(r.dietary.includes("Gluten-free")){score+=10; reasons.push("✓ Gluten-free options");} }
+      if(q.includes("fast")||q.includes("quick")){ if(r.waitNum<=12){score+=8; reasons.push(`✓ Fast • ${r.wait}`);} }
+      if(q.includes("dessert")){ if(r.tags.includes("Good desserts")){score+=7; reasons.push("✓ Good desserts");} }
+    } else {
+      eaters.forEach(m=> m.prefs.forEach(p=>{
+        if(p==="Outdoor seating"&&r.tags.includes("Outdoor seating")) score+=5;
+        if(p==="Quiet"&&r.tags.includes("Quiet")) score+=5;
+        if(p==="Cheap"&&r.priceNum<=40) score+=5;
+        if(p==="Family friendly"&&r.tags.includes("Family friendly")) score+=5;
+        if(p==="Kids menu"&&r.tags.includes("Kids menu")) score+=5;
+        if(p==="Fast service"&&r.waitNum<=12) score+=4;
+      }));
+    }
+    score+=Math.max(0,10-r.distanceNum*2);
+    score+=(r.rating-4)*8;
+    const hasReviewed=familyReviews.some(fr=> fr.restaurantId===r.id && fr.familyName===(state.family.name||"Your family"));
+    if(hasReviewed) score-=1;
+    let match=Math.max(22,Math.min(98,Math.round(score)));
+    if(hardFail) match=Math.min(match,58);
+    return {r,score,match,reasons:[...new Set(reasons)].slice(0,6),blocks,hardFail};
+  }).sort((a,b)=> b.score-a.score);
+}
+
+async function getGPTRecommendations(userQuery, eaters){
+  const restaurantsCompact=restaurants.map(r=>({id:r.id,name:r.name,cuisine:r.cuisine,rating:r.rating,price:r.price,priceNum:r.priceNum,distance:r.distance,distanceNum:r.distanceNum,wait:r.wait,tags:r.tags,dietary:r.dietary,seating:r.seating,languages:r.languages}));
+  const eatersCompact=eaters.map(m=>({name:m.name,dietary:m.dietary,allergies:m.allergies,prefs:m.prefs}));
+  if(!eatersCompact.length) eatersCompact.push({name:"Generic family",dietary:[],allergies:[],prefs:[]});
+  const system=`You are Familia AI, a family restaurant recommender. You MUST ONLY use restaurants from the provided database — never hallucinate. Ranking priority: 1) HARD: dietary/allergies (vegetarian/vegan/halal/gluten-free and allergies gluten/nuts/dairy/seafood/shellfish/eggs — if a restaurant violates a hard requirement, cap match ≤58% and add warning), 2) user's explicit request (cheap/close/outdoor/quiet/family/kids/vegetarian/gluten/fast/dessert), 3) distance (closer better), 4) soft preferences (outdoor/quiet/cheap/family friendly/kids menu/fast service), 5) history/rating tie-break. Output strict JSON: {"recommendations":[{"id":"anatolia","match":94,"reasons":["✓ Vegetarian for Mom","✓ 0.8 km away","✓ Within price range"],"warning":null}], "explanation":"short"} with exactly 3 recommendations sorted best first, match 0-100, reasons 3-5 short bullets each starting with ✓, warning string if hard fail else null. Use restaurant ids exactly as given.`;
+  const user=`User query: "${userQuery||"(no specific request — use preferences & distance)"}"
+
+Restaurants JSON: ${JSON.stringify(restaurantsCompact)}
+
+Eaters JSON: ${JSON.stringify(eatersCompact)}
+
+Return 3 recommendations.`;
+  const res=await fetch("https://api.openai.com/v1/chat/completions",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":`Bearer ${OPENAI_API_KEY}`},
+    body:JSON.stringify({model:OPENAI_MODEL,temperature:0.35,max_tokens:900,response_format:{type:"json_object"},messages:[{role:"system",content:system},{role:"user",content:user}]})
+  });
+  if(!res.ok){ const t=await res.text().catch(()=> ""); throw new Error(`OpenAI ${res.status}: ${t.slice(0,160)}`); }
+  const data=await res.json();
+  const content=data.choices?.[0]?.message?.content;
+  if(!content) throw new Error("Empty GPT response");
+  let parsed; try{ parsed=JSON.parse(content);} catch(e){ const m=content.match(/\{[\s\S]*\}/); if(m) parsed=JSON.parse(m[0]); else throw e; }
+  if(!parsed.recommendations||!Array.isArray(parsed.recommendations)) throw new Error("Invalid GPT JSON");
+  const mapped=parsed.recommendations.map(rec=>{
+    const r=restaurants.find(x=>x.id===rec.id);
+    if(!r) return null;
+    const match=Math.max(22,Math.min(98,Math.round(rec.match||70)));
+    const reasons=Array.isArray(rec.reasons)? rec.reasons.slice(0,5):[];
+    const warning=rec.warning||null;
+    const hardFail=!!warning||match<=58;
+    return {r,match,reasons,blocks:warning?[warning]:[],hardFail,score:match, gpt:true};
+  }).filter(Boolean);
+  if(mapped.length<2) throw new Error("GPT returned too few valid");
+  return mapped.slice(0,3);
+}
+
+function renderAIResults(top, isGPT){
+  const best=top[0];
+  const resultsEl=document.getElementById("aiResults");
+  let html="";
+  if(best.hardFail){
+    html+=`<div style="background:#FFF0EE; border:1px solid #FFD9D6; color:#9B1C14; padding:12px 14px; border-radius:18px; font-size:12.5px; line-height:1.5"><b style="display:flex; align-items:center; gap:6px"><i data-lucide="alert-triangle" style="width:14px;height:14px"></i> Hard requirement warning</b>Top result violates a hard requirement. Showing closest alternatives — consider adjusting who's eating or try different keywords.</div>`;
+  }
+  html+=`
+    <div class="ai-result" data-view="${best.r.id}" style="cursor:pointer" title="View ${best.r.name}">
+      <div class="ai-result-head" style="cursor:pointer">
+        <img src="${best.r.image}" alt="${best.r.name}" onerror="this.src='https://picsum.photos/seed/${best.r.id}/200/200'">
+        <div style="flex:1; min-width:0">
+          <div class="ai-match"><i data-lucide="badge-check" style="width:12px;height:12px"></i> ${best.match}% Family match</div>
+          <div style="font-weight:800; font-size:16px; line-height:1.1; color:#2F3D36">${best.r.name}</div>
+          <div style="font-size:12.5px; color:#7A8B83; font-weight:600; margin-top:4px">★ ${best.r.rating.toFixed(1)} • ${best.r.cuisine} • ${best.r.price} • ${best.r.distance} • ${best.r.wait}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px">${best.r.tags.slice(0,3).map(t=>`<span style="font-size:11px; font-weight:700; background:var(--mint); border:1px solid #A9CFA4; color:#2F4A3E; padding:5px 8px; border-radius:8px">${t}</span>`).join("")}</div>
+        </div>
+      </div>
+      <div style="background:#F2F7F0; border:1px solid #D8E4D5; border-radius:10px; padding:12px">
+        <div style="font-size:12px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:#3E6B57; margin-bottom:8px">AI reasoning</div>
+        <ul class="ai-why">
+          ${(best.reasons.length? best.reasons : ["✓ Good overall match for your query","✓ Highly rated by families","✓ "+best.r.distance+" away"]).map(x=>`<li><i data-lucide="check-circle-2" style="width:14px;height:14px"></i> ${x.replace("✓ ","")}</li>`).join("")}
+          ${best.blocks.length? `<li style="color:#9B1C14"><i data-lucide="x-circle" style="width:14px;height:14px; color:#B7791F"></i> ${best.blocks[0]}</li>` : ""}
+        </ul>
+      </div>
+      <button class="btn-primary accent" data-view="${best.r.id}">View restaurant <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+      <div style="font-size:11px; color:#7A8B83; font-weight:600; text-align:center">Intelligent ranking via AI</div>
+    </div>
+  `;
+  html+=`<div style="font-size:12px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:#7A8B83; margin-top:2px">Also good matches</div>`;
+  top.slice(1).forEach(sc=>{
+    html+=`
+      <div style="background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; gap:12px; padding:12px; cursor:pointer" data-view="${sc.r.id}">
+        <img src="${sc.r.image}" style="width:64px; height:64px; border-radius:10px; object-fit:cover; flex-shrink:0" onerror="this.src='https://picsum.photos/seed/${sc.r.id}/200/200'">
+        <div style="flex:1; min-width:0">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px"><b style="font-size:13.5px; color:#2F3D36">${sc.r.name}</b> <span style="font-size:11px; font-weight:800; background:${sc.hardFail?"#FDEEDC":"var(--mint)"}; color:${sc.hardFail?"#9B1C14":"#2F4A3E"}; border:1px solid ${sc.hardFail?"#E8C48A":"#A9CFA4"}; padding:3px 7px; border-radius:8px">${sc.match}%</span></div>
+          <div style="font-size:12px; color:#7A8B83; font-weight:600">${sc.r.cuisine} • ${sc.r.price} • ${sc.r.distance} • ★ ${sc.r.rating.toFixed(1)}</div>
+          <div style="font-size:11.5px; color:#2F3D36; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${(sc.reasons[0]|| "Good match").replace("✓ ","✓ ")}</div>
+        </div>
+        <i data-lucide="chevron-right" style="width:16px;height:16px; color:#A9B8B1; flex-shrink:0; align-self:center"></i>
+      </div>
+    `;
+  });
+  resultsEl.innerHTML=html;
+  resultsEl.querySelectorAll("[data-view]").forEach(b=> b.addEventListener("click",()=> openRestaurant(b.dataset.view)));
+  lucide.createIcons();
+  document.querySelector("#screen-ai .screen-scroll").scrollTo({top: 420, behavior:"smooth"});
+}
+
+async function runAI(){
+  const raw=(document.getElementById("aiInput").value||"").trim();
+  const q=raw.toLowerCase();
+  const selectedIds=[...state.selectedEaters];
+  const eaters=selectedIds.length? state.family.members.filter(m=> selectedIds.includes(m.id)) : (state.family.members.length? state.family.members:[]);
+  const resultsEl=document.getElementById("aiResults");
+  const gptOn=OPENAI_ENABLED;
+  resultsEl.innerHTML=`<div style="display:flex; align-items:center; gap:12px; padding:14px; background:#fff; border:1px solid #ECE9E6; border-radius:18px"><div style="width:28px; height:28px; border:2px solid #ECE9E6; border-top-color:#3E6B57; border-radius:999px; animation:spin 0.7s linear infinite"></div><div style="flex:1"><div style="font-weight:800; font-size:13px">Finding your family match…</div><div style="font-size:11px; color:#8B8B97; font-weight:600">Checking requirements, distance & preferences</div></div><span style="font-size:9px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; background:var(--mint); color:#2F4A3E; border:1px solid #A9CFA4; padding:4px 7px; border-radius:8px">AI</span></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+  if(gptOn && raw.length>1){
+    try{
+      const gptTop=await Promise.race([
+        getGPTRecommendations(raw, eaters),
+        new Promise((_,rej)=> setTimeout(()=> rej(new Error("GPT timeout after 6s")), 6000))
+      ]);
+      if(gptTop && gptTop.length){
+        renderAIResults(gptTop, true);
+        toast("✓ AI match ready");
+        return;
+      }
+    }catch(e){
+      console.warn("[Familia AI] fallback to local:", e.message);
+      // Show reason for fallback — no silent fail
+      const msg=String(e.message||"");
+      if(msg.includes("429")) toast("AI busy — using local ranking");
+      else if(msg.includes("401")||msg.includes("403")) toast("AI key error — using local");
+      else if(msg.includes("Failed to fetch")||msg.includes("NetworkError")||msg.includes("CORS")) toast("AI blocked — local fallback");
+      else if(!msg.includes("timeout")) toast("AI unavailable — local ranking");
+    }
+  }
+  // fallback local (also used when no query or GPT disabled)
+  setTimeout(()=>{
+    const scored=scoreRestaurantsLocally(q, eaters);
+    const top=scored.slice(0,3);
+    renderAIResults(top, false);
+  }, gptOn? 300: 520);
+}
+
+function clearFilters(){
+  state.filters={dist:"any", price:"any", rating:"any", cuisines:[], dietary:[]};
+  updateHomeFilters(); renderHome();
+}
+
+// CLOCK
+function tick(){
+  const d=new Date();
+  document.getElementById("clock").textContent=d.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
+}
+setInterval(tick, 30000); tick();
+
+// INIT
+updateHomeFilters();
+renderHome();
+renderSetup();
+// Cloud first, local seed stays as the offline fallback
+syncFromSupabase().then(ok=>{
+  if(!ok) return;
+  state.selectedEaters=new Set(state.family.members.map(m=>m.id));
+  updateHomeFilters(); renderHome(); renderSetup();
+  toast(`Synced • ${restaurants.length} spots`);
+}).catch(e=> console.warn("[Supabase] offline, using local data:", e.message));
+lucide.createIcons();
+if(OPENAI_ENABLED){
+  console.log("[Familia AI] GPT-4o mini enabled");
+} else {
+  console.log("[Familia AI] GPT disabled — using local ranking");
+}
+
+// EVENTS — Setup
+document.getElementById("addMemberBtn").addEventListener("click",()=> openMemberSheet(null));
+document.getElementById("closeMemberSheet").addEventListener("click", closeMemberSheet);
+document.getElementById("memberSheet").addEventListener("click",(e)=>{ if(e.target.id==="memberSheet") closeMemberSheet(); });
+document.getElementById("saveMemberBtn").addEventListener("click", saveMember);
+document.getElementById("deleteMemberBtn").addEventListener("click", deleteMember);
+document.getElementById("familyNameInput").addEventListener("input",(e)=>{ state.family.name=e.target.value.trim(); const hr=new Date().getHours(); const g= hr<12?"Good morning": hr<18?"Good afternoon":"Good evening"; document.getElementById("greeting").textContent= state.family.name? `${g}, ${state.family.name}` : `${g}`; });
+// LANDING — Create goes to Family tab with navbar (autosave, no Continue), Skip goes straight to Discover
+document.getElementById("landingCreate").addEventListener("click",()=>{
+  renderSetup();
+  showScreen("setup","family");
+});
+document.getElementById("landingSkip").addEventListener("click",()=>{
+  state.selectedEaters = new Set(state.family.members.map(m=>m.id));
+  renderEaters();
+  renderHome();
+  showScreen("home","home");
+});
+
+// Search
+document.getElementById("searchInput").addEventListener("input",(e)=>{ state.search=e.target.value; renderHome(); });
+document.querySelectorAll("#quickFilters .qchip").forEach(b=>{
+  b.addEventListener("click",()=>{ state.quick=b.dataset.q; document.querySelectorAll("#quickFilters .qchip").forEach(x=>x.classList.toggle("on", x===b)); renderHome(); });
+});
+
+// Filters
+document.getElementById("openFilters").addEventListener("click",()=>{ document.getElementById("filterSheet").classList.add("open"); });
+document.getElementById("closeFilters").addEventListener("click",()=> document.getElementById("filterSheet").classList.remove("open"));
+document.getElementById("filterSheet").addEventListener("click",(e)=>{ if(e.target.id==="filterSheet") e.currentTarget.classList.remove("open"); });
+document.querySelectorAll("[data-filter-dist]").forEach(b=> b.addEventListener("click",()=>{ state.filters.dist=b.dataset.filterDist; updateHomeFilters(); }));
+document.querySelectorAll("[data-filter-price]").forEach(b=> b.addEventListener("click",()=>{ state.filters.price=b.dataset.filterPrice; updateHomeFilters(); }));
+document.querySelectorAll("[data-filter-rating]").forEach(b=> b.addEventListener("click",()=>{ state.filters.rating=b.dataset.filterRating; updateHomeFilters(); }));
+document.getElementById("clearFilters").addEventListener("click",()=>{ clearFilters(); toast("Filters cleared"); });
+document.getElementById("applyFilters").addEventListener("click",()=>{ document.getElementById("filterSheet").classList.remove("open"); renderHome(); toast("Filters applied"); });
+
+// Detail nav
+document.getElementById("detailBack").addEventListener("click",()=> showScreen("home"));
+
+// New-restaurant form — text inputs mirror state (chips paint in place, so typing is never wiped)
+["nrName","nrMaps","nrHours","nrCity","nrBill","nrComment"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",(e)=>{
+    const key={nrName:"name",nrMaps:"maps",nrHours:"hours",nrCity:"city",nrBill:"bill",nrComment:"comment"}[id];
+    state.nr[key]=e.target.value;
+    if(id==="nrBill") updatePerPerson();
+  });
+});
+document.getElementById("nrPhoto").addEventListener("change",(e)=>{
+  const f=e.target.files&&e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    state.nr.imgData=String(rd.result);
+    const img=document.getElementById("nrPhotoPreview");
+    img.src=state.nr.imgData; img.style.display="block";
+    document.getElementById("nrPhotoEmpty").style.display="none";
+  };
+  rd.readAsDataURL(f);
+});
+document.getElementById("nrPartyMinus").addEventListener("click",()=>{ state.nr.party=Math.max(1,state.nr.party-1); document.getElementById("nrPartyVal").textContent=state.nr.party; updatePerPerson(); });
+document.getElementById("nrPartyPlus").addEventListener("click",()=>{ state.nr.party=Math.min(20,state.nr.party+1); document.getElementById("nrPartyVal").textContent=state.nr.party; updatePerPerson(); });
+document.getElementById("nrClear").addEventListener("click",()=>{ resetNRForm(); toast("Form cleared"); });
+document.getElementById("nrSubmit").addEventListener("click", submitNewRestaurant);
+
+// AI
+document.getElementById("aiSend").addEventListener("click", runAI);
+document.getElementById("aiInput").addEventListener("keydown",(e)=>{ if(e.key==="Enter" && (e.metaKey||e.ctrlKey)) runAI(); });
+document.querySelectorAll(".ai-ex").forEach(b=> b.addEventListener("click",()=>{ document.getElementById("aiInput").value=b.dataset.ex; document.getElementById("aiInput").focus(); }));
+document.getElementById("aiFab").addEventListener("click",()=> showScreen("ai"));
+document.getElementById("aiFab2").addEventListener("click",()=> showScreen("ai"));
+document.getElementById("detailAiFab").addEventListener("click",()=> showScreen("ai"));
+
+// Bottom nav
+document.querySelectorAll("[data-nav]").forEach(b=>{
+  b.addEventListener("click",()=>{
+    const nav=b.dataset.nav;
+    if(nav==="home") showScreen("home","home");
+    else if(nav==="ai") { renderEaters(); showScreen("ai","ai"); }
+    else if(nav==="reviews"){ openNewReview(); }
+    else if(nav==="family"){ showScreen("setup","family"); toast("Edit family — changes affect AI recommendations"); }
+  });
+});
+
+// Keyboard: escape closes sheets
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape"){
+    document.getElementById("memberSheet").classList.remove("open");
+    document.getElementById("filterSheet").classList.remove("open");
+  }
+});
+</script>
+</body>
+</html>
