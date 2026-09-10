@@ -3,6 +3,48 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme.dart';
 
+class PageBanner extends StatelessWidget {
+  final String title;
+  final double titleSize;
+  final Widget? subtitle;
+  final Widget? titleLeading;
+  final Widget? bottom;
+  const PageBanner({
+    super.key,
+    required this.title,
+    this.titleSize = 30,
+    this.subtitle,
+    this.titleLeading,
+    this.bottom,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.sage,
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (titleLeading != null) ...[titleLeading!, const SizedBox(width: 9)],
+              Expanded(
+                child: Text(title, style: displayCaveat(size: titleSize, color: Colors.white)),
+              ),
+            ],
+          ),
+          if (subtitle != null) ...[const SizedBox(height: 6), subtitle!],
+          if (bottom != null) ...[const SizedBox(height: 14), bottom!],
+        ],
+      ),
+    );
+  }
+}
+
+TextStyle bannerSub() => GoogleFonts.inter(
+    fontSize: 12.5, color: Colors.white.withValues(alpha: 0.92), height: 1.5);
+
 class SectionLabel extends StatelessWidget {
   final String text;
   const SectionLabel(this.text, {super.key});

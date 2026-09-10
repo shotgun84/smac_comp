@@ -69,19 +69,9 @@ class ReviewScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            color: AppColors.sage,
-            padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('New restaurant review',
-                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
-                Text('Been somewhere new? Add it for every family.',
-                    style: GoogleFonts.inter(
-                        fontSize: 12, color: Colors.white.withValues(alpha: 0.85), fontWeight: FontWeight.w600)),
-              ],
-            ),
+          PageBanner(
+            title: 'New restaurant review',
+            subtitle: Text('Been somewhere new? Add it for every family.', style: bannerSub()),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 150),

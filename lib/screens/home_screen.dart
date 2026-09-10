@@ -51,89 +51,82 @@ class HomeScreen extends StatelessWidget {
         child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            color: AppColors.sage,
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          PageBanner(
+            title: greeting,
+            subtitle: Row(
               children: [
-                Text(greeting, style: displayCaveat(size: 30, color: Colors.white)),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 14, color: Color(0xFFE07B39)),
-                    const SizedBox(width: 4),
-                    Text(locationText,
-                        style: GoogleFonts.inter(
-                            fontSize: 11.5, color: Colors.white.withValues(alpha: 0.92), fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 42,
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.search, size: 16, color: Color(0xFFACACB8)),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: TextField(
-                                controller: searchCtrl,
-                                onChanged: onSearch,
-                                decoration: InputDecoration(
-                                  hintText: 'Search restaurants...',
-                                  hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 13.5),
-                                  border: InputBorder.none,
-                                ),
-                                style: GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w500),
-                              ),
+                const Icon(Icons.location_on, size: 14, color: Color(0xFFE07B39)),
+                const SizedBox(width: 4),
+                Text(locationText,
+                    style: GoogleFonts.inter(
+                        fontSize: 11.5,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600)),
+              ],
+            ),
+            bottom: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 42,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search, size: 16, color: Color(0xFFACACB8)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: searchCtrl,
+                            onChanged: onSearch,
+                            decoration: InputDecoration(
+                              hintText: 'Search restaurants...',
+                              hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 13.5),
+                              border: InputBorder.none,
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: onFilters,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: AppColors.sageDark,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                            ),
-                            child: const Icon(Icons.tune, size: 18, color: Colors.white),
+                            style: GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w500),
                           ),
-                          if (filterCount > 0)
-                            Positioned(
-                              right: -6,
-                              top: -6,
-                              child: Container(
-                                width: 22,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE07B39),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text('$filterCount',
-                                    style: GoogleFonts.inter(
-                                        fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
-                              ),
-                            ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: onFilters,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: AppColors.sageDark,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                        ),
+                        child: const Icon(Icons.tune, size: 18, color: Colors.white),
+                      ),
+                      if (filterCount > 0)
+                        Positioned(
+                          right: -6,
+                          top: -6,
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE07B39),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text('$filterCount',
+                                style: GoogleFonts.inter(
+                                    fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),

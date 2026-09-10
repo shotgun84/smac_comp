@@ -39,25 +39,12 @@ class FamilyScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFFA3B25B), Color(0xFF5FA47E), Color(0xFF2E8B6E)],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Create your family', style: displayCaveat(size: 44, color: Colors.white)),
-                const SizedBox(height: 8),
-                Text(
-                  "Tell us who's eating with you. We'll use this to make better restaurant recommendations.",
-                  style: GoogleFonts.inter(fontSize: 12.5, color: Colors.white.withValues(alpha: 0.92), height: 1.5),
-                ),
-              ],
+          PageBanner(
+            title: 'Create your family',
+            titleSize: 36,
+            subtitle: Text(
+              "Tell us who's eating with you. We'll use this to make better restaurant recommendations.",
+              style: bannerSub(),
             ),
           ),
           Padding(

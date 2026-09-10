@@ -32,31 +32,20 @@ class AiScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.sageDark),
-                      child: const Icon(Icons.smart_toy_outlined, size: 15, color: Colors.white),
-                    ),
-                    const SizedBox(width: 9),
-                    Text('Family AI', style: displayCaveat(size: 30, color: AppColors.ink)),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text('Select who\'s eating. Allergies first, preferences second.',
-                    style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF5A6E65), height: 1.5)),
-              ],
+          PageBanner(
+            title: 'Family AI',
+            titleLeading: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.18),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.4))),
+              child: const Icon(Icons.smart_toy_outlined, size: 15, color: Colors.white),
             ),
+            subtitle: Text('Select who\'s eating. Allergies first, preferences second.',
+                style: bannerSub()),
           ),
-          const Divider(height: 1, color: Color(0xFFF0EDE9)),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 100),
             child: Column(
