@@ -58,7 +58,7 @@ class AiScreen extends StatelessWidget {
           ),
           const Divider(height: 1, color: Color(0xFFF0EDE9)),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -158,7 +158,13 @@ class AiScreen extends StatelessWidget {
                         style: GoogleFonts.inter(fontSize: 13.5, height: 1.5),
                       ),
                       const SizedBox(height: 12),
-                      PrimaryButton(label: 'Find best match', onTap: onRun, icon: Icons.auto_awesome_outlined),
+                      Opacity(
+                        opacity: loading ? 0.6 : 1,
+                        child: PrimaryButton(
+                            label: loading ? 'Finding your match…' : 'Find best match',
+                            onTap: onRun,
+                            icon: Icons.auto_awesome_outlined),
+                      ),
                     ],
                   ),
                 ),
@@ -184,7 +190,7 @@ class AiScreen extends StatelessWidget {
                             children: [
                               Text('Finding your family match…',
                                   style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 13)),
-                              Text('Checking requirements, distance & preferences',
+                              Text('Checking requirements & preferences',
                                   style: GoogleFonts.inter(
                                       fontSize: 11, color: const Color(0xFF8B8B97), fontWeight: FontWeight.w600)),
                             ],
@@ -308,7 +314,7 @@ class _Results extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text(best.r.name,
+                          Text(cap(best.r.name),
                               style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w800, height: 1.1)),
                           const SizedBox(height: 4),
                           Text(
@@ -390,7 +396,7 @@ class _Results extends StatelessWidget {
                 PrimaryButton(label: 'View restaurant', onTap: () => onOpen(best.r.id), mintStyle: true, icon: Icons.arrow_forward),
                 const SizedBox(height: 8),
                 Center(
-                    child: Text('Intelligent ranking via AI',
+                    child: Text('Ranked for your family',
                         style: GoogleFonts.inter(
                             fontSize: 11, color: AppColors.muted, fontWeight: FontWeight.w600))),
               ],
@@ -431,7 +437,7 @@ class _Results extends StatelessWidget {
                             Row(
                               children: [
                                 Expanded(
-                                    child: Text(sc.r.name,
+                                    child: Text(cap(sc.r.name),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w800))),
@@ -476,3 +482,4 @@ class _Results extends StatelessWidget {
     );
   }
 }
+

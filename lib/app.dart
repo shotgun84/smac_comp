@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'backend.dart';
 import 'config.dart';
 import 'data.dart';
@@ -28,13 +30,19 @@ class _FamiliaRootState extends State<FamiliaRoot> {
   String nav = 'home';
 
   String familyName = '';
+  String familyPin = '';
   List<FamilyMember> members = [];
   Set<String> selectedEaters = {};
+  Set<String> favorites = {};
+  bool loggedIn = false;
 
   List<Restaurant> restaurants = [];
   List<FamilyReview> reviews = [];
   bool loading = true;
   String? loadError;
+  String syncedText = 'Not synced yet';
+  int _saving = 0;
+  Timer? _syncTimer;
 
   String search = '';
   String quick = 'all';
@@ -42,8 +50,10 @@ class _FamiliaRootState extends State<FamiliaRoot> {
   String currentId = '';
 
   final familyNameCtrl = TextEditingController();
+  final pinCtrl = TextEditingController();
   final searchCtrl = TextEditingController();
   final aiCtrl = TextEditingController();
+  String saveNote = '';
 
   NewRestaurantDraft draft = NewRestaurantDraft();
   final nrName = TextEditingController();
@@ -60,9 +70,13 @@ class _FamiliaRootState extends State<FamiliaRoot> {
 
   bool aiLoading = false;
   List<Scored> aiResults = [];
+  final Map<String, List<Scored>> _aiCache = {};
 
   bool inlineOpen = false;
   Map<String, int> inlineRatings = {};
+  Map<String, String> inlineComments = {};
+  bool inlineIndividual = false;
+  int inlineStep = 0;
   final inlineComment = TextEditingController();
 
   @override
@@ -79,13 +93,22 @@ class _FamiliaRootState extends State<FamiliaRoot> {
       }
     } catch (_) {}
     unawaited(loadData());
+    unawaited(loadSession());
+    if (!const bool.fromEnvironment('FLUTTER_TEST')) {
+      _syncTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+        if (!mounted || loading || _saving > 0) return;
+        unawaited(loadData(silent: true));
+      });
+    }
   }
 
-  Future<void> loadData() async {
-    setState(() {
-      loading = true;
-      loadError = null;
-    });
+  Future<void> loadData({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        loading = true;
+        loadError = null;
+      });
+    }
     try {
       final rs = await fetchRestaurants();
       List<FamilyReview> revs = [];
@@ -97,19 +120,245 @@ class _FamiliaRootState extends State<FamiliaRoot> {
         restaurants = rs;
         reviews = revs;
         loading = false;
+        loadError = null;
+        final t = TimeOfDay.now();
+        final hh = t.hour.toString().padLeft(2, '0');
+        final mm = t.minute.toString().padLeft(2, '0');
+        syncedText = 'Updated $hh:$mm';
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        loading = false;
-        loadError = 'Couldn\'t reach the restaurant database. Check your connection and retry.';
+        if (!silent || restaurants.isEmpty) {
+          loading = false;
+          loadError = 'Couldn\'t reach the restaurant database. Check your connection and retry.';
+        }
       });
+    }
+  }
+
+  Future<void> loadSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final guestFavs = prefs.getStringList('familia_guest_favs') ?? [];
+      setState(() => favorites = guestFavs.toSet());
+      final name = prefs.getString('familia_name') ?? '';
+      final pin = prefs.getString('familia_pin') ?? '';
+      if (name.isEmpty || pin.isEmpty) return;
+      final acc = await fetchFamily(name);
+      if (!mounted) return;
+      if (acc != null && acc.pin == pin) {
+        applyAccount(acc, persist: false);
+        if (screen == 'landing') go('home', 'home');
+      } else {
+        await prefs.remove('familia_name');
+        await prefs.remove('familia_pin');
+      }
+    } catch (_) {}
+  }
+
+  Future<void> persistSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (loggedIn && familyName.isNotEmpty) {
+        await prefs.setString('familia_name', familyName);
+        await prefs.setString('familia_pin', familyPin);
+      }
+      if (!loggedIn) {
+        await prefs.setStringList('familia_guest_favs', favorites.toList());
+      }
+    } catch (_) {}
+  }
+
+  void applyAccount(FamilyAccount acc, {bool persist = true}) {
+    setState(() {
+      familyName = acc.name;
+      familyPin = acc.pin;
+      familyNameCtrl.text = acc.name;
+      members = acc.members;
+      selectedEaters = members.map((m) => m.id).toSet();
+      favorites = acc.favorites.toSet();
+      loggedIn = true;
+      saveNote = '';
+    });
+    if (persist) unawaited(persistSession());
+  }
+
+  void syncFamilyToCloud() {
+    if (!loggedIn || familyName.isEmpty || familyPin.isEmpty) return;
+    saveFamily(FamilyAccount(
+      name: familyName,
+      pin: familyPin,
+      members: List.of(members),
+      favorites: favorites.toList(),
+    )).then((ok) {
+      if (!mounted || ok) return;
+      snack('Family changes saved on this device only');
+    });
+  }
+
+  Future<void> signOut() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('familia_name');
+      await prefs.remove('familia_pin');
+    } catch (_) {}
+    setState(() {
+      familyName = '';
+      familyPin = '';
+      familyNameCtrl.clear();
+      pinCtrl.clear();
+      members = [];
+      selectedEaters = {};
+      favorites = {};
+      loggedIn = false;
+      saveNote = '';
+      aiResults = [];
+      _aiCache.clear();
+    });
+    go('landing', 'home');
+  }
+
+  void openSignInSheet() {
+    final nameCtrl = TextEditingController();
+    final pinInput = TextEditingController();
+    var error = '';
+    var busy = false;
+    showFamiliaSheet(
+      context,
+      'Sign in',
+      StatefulBuilder(
+        builder: (ctx, setSheet) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionLabel('Family name'),
+            const SizedBox(height: 6),
+            FamiliaInput(controller: nameCtrl, hint: 'e.g. The Khan Family', maxLength: 28),
+            const SizedBox(height: 12),
+            const SectionLabel('Family PIN'),
+            const SizedBox(height: 6),
+            FamiliaInput(
+              controller: pinInput,
+              hint: 'Your family PIN',
+              maxLength: 24,
+              keyboard: TextInputType.visiblePassword,
+              obscure: true,
+            ),
+            if (error.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(error,
+                  style: GoogleFonts.inter(
+                      fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.danger)),
+            ],
+          ],
+        ),
+      ),
+      foot: StatefulBuilder(
+        builder: (ctx, setFoot) => PrimaryButton(
+          label: busy ? 'Signing in…' : 'Sign in',
+          onTap: busy
+              ? () {}
+              : () async {
+                  final name = nameCtrl.text.trim();
+                  if (name.isEmpty || pinInput.text.isEmpty) {
+                    setFoot(() {});
+                    Navigator.pop(context);
+                    snack('Enter your family name and PIN');
+                    return;
+                  }
+                  setFoot(() => busy = true);
+                  try {
+                    final acc = await fetchFamily(name);
+                    if (!mounted) return;
+                    if (acc == null) {
+                      snack('No family found with that name');
+                    } else if (acc.pin != pinInput.text) {
+                      snack('Wrong PIN for that family');
+                    } else {
+                      Navigator.pop(context);
+                      applyAccount(acc);
+                      go('home', 'home');
+                      snack('Welcome back, ${acc.name}');
+                      return;
+                    }
+                  } catch (_) {
+                    if (mounted) snack('Couldn\'t reach the database');
+                  }
+                  if (mounted) Navigator.pop(context);
+                },
+        ),
+      ),
+    );
+  }
+
+  Future<void> saveFamilyAccount() async {
+    final name = familyNameCtrl.text.trim();
+    if (name.isEmpty) {
+      snack('Add a family name first');
+      return;
+    }
+    if (pinCtrl.text.length < 4) {
+      snack('PIN needs at least 4 characters');
+      return;
+    }
+    setState(() => saveNote = 'Saving…');
+    final acc = FamilyAccount(
+      name: name,
+      pin: pinCtrl.text,
+      members: List.of(members),
+      favorites: favorites.toList(),
+    );
+    final ok = await saveFamily(acc);
+    if (!mounted) return;
+    setState(() {
+      familyName = name;
+      if (ok) familyPin = pinCtrl.text;
+      loggedIn = ok ? true : loggedIn;
+      saveNote = ok ? 'Saved — use this name + PIN to sign in anywhere' : 'Couldn\'t reach the database';
+    });
+    if (ok) {
+      unawaited(persistSession());
+      snack('Family saved');
+    }
+  }
+
+  void toggleFav(String id) {
+    setState(() {
+      if (favorites.contains(id)) {
+        favorites.remove(id);
+      } else {
+        favorites.add(id);
+      }
+    });
+    if (loggedIn) {
+      syncFamilyToCloud();
+    } else {
+      unawaited(persistSession());
+    }
+  }
+
+  Future<void> pickPhoto() async {
+    try {
+      final img = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200,
+        imageQuality: 82,
+      );
+      if (img == null) return;
+      final bytes = await img.readAsBytes();
+      if (!mounted) return;
+      setState(() => draft.photoBytes = bytes.toList());
+    } catch (_) {
+      snack('Couldn\'t read that photo');
     }
   }
 
   @override
   void dispose() {
+    _syncTimer?.cancel();
     familyNameCtrl.dispose();
+    pinCtrl.dispose();
     searchCtrl.dispose();
     aiCtrl.dispose();
     nrName.dispose();
@@ -149,6 +398,9 @@ class _FamiliaRootState extends State<FamiliaRoot> {
       currentId = id;
       inlineOpen = false;
       inlineRatings = {};
+      inlineComments = {};
+      inlineIndividual = false;
+      inlineStep = 0;
       inlineComment.clear();
       screen = 'detail';
     });
@@ -159,11 +411,32 @@ class _FamiliaRootState extends State<FamiliaRoot> {
     return restaurants.where((r) => r.id == currentId).firstOrNull ?? restaurants.first;
   }
 
-  List<Restaurant> get filtered =>
-      getFiltered(restaurants, search: search, quick: quick, filters: filters);
+  List<Restaurant> get filtered => getFiltered(
+        restaurants,
+        search: search,
+        quick: quick,
+        filters: filters,
+        favorites: favorites,
+      );
+
+  int get filterBadge =>
+      filters.activeCount + (quick == 'all' ? 0 : 1) + (search.trim().isEmpty ? 0 : 1);
 
   String get locationText =>
       filters.emirate == 'any' ? 'UAE • All Emirates' : 'UAE • ${filters.emirate}';
+
+  List<(String, String)> inlineEntries() {
+    if (members.isEmpty) return [('__guest__', 'Guest')];
+    return [for (final m in members) (m.id, m.name)];
+  }
+
+  List<(String, String)> nrEntries() {
+    if (members.isEmpty) return [('__guest__', 'Guest')];
+    return [
+      for (final id in draft.who)
+        (id, members.where((m) => m.id == id).firstOrNull?.name ?? 'Guest'),
+    ];
+  }
 
   void openNewReview() {
     setState(() {
@@ -185,107 +458,190 @@ class _FamiliaRootState extends State<FamiliaRoot> {
     });
   }
 
+  void confirmClear() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Text('Clear everything?',
+            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.ink)),
+        content: Text('This wipes the name, photo, chips, party details and all ratings you entered.',
+            style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.muted, height: 1.5)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Keep editing',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: AppColors.sageDark)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              resetNrForm();
+            },
+            child: Text('Clear it',
+                style:
+                    GoogleFonts.inter(fontWeight: FontWeight.w800, color: AppColors.danger)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  double nrAvgValue() {
+    if (!draft.individual) return (draft.ratings['__family__'] ?? 0).toDouble();
+    final entries = nrEntries();
+    if (entries.isEmpty) return 0;
+    final vals = [for (final e in entries) draft.ratings[e.$1] ?? 0].where((v) => v > 0).toList();
+    if (vals.isEmpty) return 0;
+    return vals.reduce((a, b) => a + b) / vals.length;
+  }
+
   void submitNewRestaurant() {
     final name = nrName.text.trim();
     if (name.isEmpty) {
       snack('Add the restaurant name first');
       return;
     }
-    if (members.isNotEmpty && draft.who.isEmpty) {
-      snack('Pick who went first');
-      return;
-    }
-    final ids = (members.isEmpty ? ['__guest__'] : draft.who)
-        .where((id) => (draft.ratings[id] ?? 0) > 0)
-        .toList();
-    if (ids.isEmpty) {
-      snack('Add at least one family rating');
-      return;
-    }
-    final avg = ids.map((id) => draft.ratings[id]!).reduce((a, b) => a + b) / ids.length;
-    final bill = double.tryParse(draft.bill) ?? 0;
-    final per = (bill > 0 && draft.party > 0) ? (bill / draft.party).round() : null;
-    final rId = 'u${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
-    final comment = nrComment.text.trim();
-    final famName = familyName.isEmpty ? 'Your family' : familyName;
-    final tags = ['New', ...draft.tags].take(8).toList();
-    final dietary = <String>[];
-    if (tags.contains('Vegetarian options')) dietary.add('Vegetarian');
-    if (tags.contains('Vegan options')) dietary.add('Vegan');
-    if (tags.contains('Gluten-free')) dietary.add('Gluten-free');
-    if (tags.contains('Halal')) dietary.add('Halal');
-    final city = '${draft.city}, UAE';
-    final resto = Restaurant(
-      id: rId,
-      name: name,
-      cuisine: draft.cuisine.isEmpty ? 'Other' : draft.cuisine,
-      rating: (avg * 10).round() / 10,
-      price: per != null ? 'AED ~$per' : 'AED —',
-      priceNum: (per ?? 999).toDouble(),
-      distance: '—',
-      distanceNum: 0,
-      wait: draft.wait.isEmpty ? '~15 min' : draft.wait,
-      waitNum: kNrWaitNum[draft.wait] ?? 15,
-      tags: tags,
-      dietary: dietary,
-      seating: draft.seating.isEmpty ? ['Indoor'] : List.of(draft.seating),
-      languages: List.of(draft.langs),
-      accessibility: List.of(draft.access),
-      image: 'https://picsum.photos/seed/$rId/800/600',
-      desc: comment.isEmpty ? 'Added by $famName.' : comment,
-      hours: nrHours.text.trim().isEmpty ? '—' : nrHours.text.trim(),
-      city: city,
-      address: city,
-      lat: '—',
-    );
-    String memberName(String id) {
-      if (id == '__guest__') return 'Guest';
-      final m = members.where((x) => x.id == id).firstOrNull;
-      return m?.name ?? 'Guest';
+    final entries = nrEntries();
+    if (draft.individual) {
+      if (members.isNotEmpty && draft.who.isEmpty) {
+        snack('Pick who went first');
+        return;
+      }
+      final missing = [for (final e in entries) if ((draft.ratings[e.$1] ?? 0) == 0) e.$2];
+      if (missing.isNotEmpty) {
+        snack('${missing.first} still needs stars');
+        return;
+      }
+    } else {
+      if ((draft.ratings['__family__'] ?? 0) == 0) {
+        snack('Tap stars to rate first');
+        return;
+      }
     }
 
-    final review = FamilyReview(
-      id: 'r$rId',
-      restaurantId: rId,
-      familyName: famName,
-      overall: (avg * 10).round() / 10,
-      createdAt: 'Just now',
-      members: ids
-          .map((id) => MemberReview(name: memberName(id), rating: draft.ratings[id]!, comment: comment))
-          .toList(),
-    );
-    setState(() {
-      restaurants.insert(0, resto);
-      reviews.insert(0, review);
-      currentId = rId;
-    });
-    saveRestaurant(resto).then((ok) {
-      if (!mounted) return;
-      if (!ok) snack('Saved on this device — offline');
-    });
-    saveReview(review).then((_) {});
-    resetNrForm();
-    go('home', 'home');
-    snack('$name added to Discover');
+    _saving++;
+    () async {
+      try {
+        final rId = 'u${DateTime.now().millisecondsSinceEpoch.toRadixString(36)}';
+        String image = 'https://picsum.photos/seed/$rId/800/600';
+        if (draft.photoBytes.isNotEmpty) {
+          try {
+            image = await uploadPhoto(draft.photoBytes, '$rId.jpg');
+          } catch (_) {
+            if (mounted) snack('Photo upload failed — using a placeholder');
+          }
+        }
+        final bill = double.tryParse(draft.bill) ?? 0;
+        final per = (bill > 0 && draft.party > 0) ? (bill / draft.party).round() : null;
+        final famName = familyName.isEmpty ? 'Your family' : familyName;
+        final tags = ['New', ...draft.tags].take(8).toList();
+        final dietary = <String>[];
+        if (tags.contains('Vegetarian options')) dietary.add('Vegetarian');
+        if (tags.contains('Vegan options')) dietary.add('Vegan');
+        if (tags.contains('Gluten-free')) dietary.add('Gluten-free');
+        if (tags.contains('Halal')) dietary.add('Halal');
+        final city = '${draft.city}, UAE';
+
+        late final List<MemberReview> memberReviews;
+        late final double avg;
+        if (draft.individual) {
+          memberReviews = [
+            for (final e in entries)
+              MemberReview(
+                name: e.$2,
+                rating: draft.ratings[e.$1] ?? 0,
+                comment: (draft.comments[e.$1] ?? '').trim().substring(
+                    0, (draft.comments[e.$1] ?? '').trim().length.clamp(0, 180)),
+              ),
+          ];
+          avg = memberReviews.map((m) => m.rating).reduce((a, b) => a + b) / memberReviews.length;
+        } else {
+          final overall = draft.ratings['__family__'] ?? 0;
+          final comment = nrComment.text.trim().substring(0, nrComment.text.trim().length.clamp(0, 180));
+          avg = overall.toDouble();
+          memberReviews = [MemberReview(name: 'Family', rating: overall, comment: comment)];
+        }
+
+        final resto = Restaurant(
+          id: rId,
+          name: name,
+          cuisine: draft.cuisine.isEmpty ? 'Other' : draft.cuisine,
+          rating: (avg * 10).round() / 10,
+          price: per != null ? 'AED ~$per' : 'AED —',
+          priceNum: (per ?? 999).toDouble(),
+          distance: '—',
+          distanceNum: 0,
+          wait: draft.wait.isEmpty ? '~15 min' : draft.wait,
+          waitNum: kNrWaitNum[draft.wait] ?? 15,
+          tags: tags,
+          dietary: dietary,
+          seating: draft.seating.isEmpty ? ['Indoor'] : List.of(draft.seating),
+          languages: List.of(draft.langs),
+          accessibility: List.of(draft.access),
+          image: image,
+          desc: memberReviews.firstWhere((m) => m.comment.isNotEmpty,
+                  orElse: () => MemberReview(name: '', rating: 0, comment: 'Added by $famName.'))
+              .comment,
+          hours: nrHours.text.trim().isEmpty ? '—' : nrHours.text.trim(),
+          city: city,
+          address: city,
+          lat: '—',
+        );
+        final review = FamilyReview(
+          id: 'r$rId',
+          restaurantId: rId,
+          familyName: famName,
+          overall: (avg * 10).round() / 10,
+          createdAt: 'Just now',
+          members: memberReviews,
+        );
+        if (!mounted) return;
+        setState(() {
+          restaurants.insert(0, resto);
+          reviews.insert(0, review);
+          currentId = rId;
+        });
+        saveRestaurant(resto).then((ok) {
+          if (!mounted) return;
+          if (!ok) snack('Saved on this device — offline');
+        });
+        saveReview(review).then((_) {});
+        resetNrForm();
+        go('home', 'home');
+        snack('$name added to Discover');
+      } finally {
+        _saving--;
+      }
+    }();
   }
 
   Future<void> runAi() async {
+    if (aiLoading) return;
     final q = aiCtrl.text.trim();
     final eaters = selectedEaters.isNotEmpty
         ? members.where((m) => selectedEaters.contains(m.id)).toList()
         : List<FamilyMember>.of(members);
-    setState(() {
-      aiLoading = true;
-    });
+    final ids = eaters.map((m) => m.id).toList()..sort();
+    final key = '${q.toLowerCase()}|${ids.join(',')}|${members.length}|$familyName';
+    final cached = _aiCache[key];
+    if (cached != null) {
+      setState(() => aiResults = cached);
+      return;
+    }
+    setState(() => aiLoading = true);
     if (kOpenAiEnabled && q.length > 1 && restaurants.isNotEmpty) {
       try {
         final gptTop = await getGptRecommendations(query: q, eaters: eaters, restaurants: restaurants);
         if (!mounted) return;
         if (gptTop.length >= 2) {
+          final top = gptTop.take(3).toList();
           setState(() {
-            aiResults = gptTop.take(3).toList();
+            aiResults = top;
             aiLoading = false;
           });
+          _aiCache[key] = top;
           return;
         }
       } catch (e) {
@@ -299,11 +655,12 @@ class _FamiliaRootState extends State<FamiliaRoot> {
     }
     await Future.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
-    final scored = scoreLocally(q, eaters, restaurants, reviews, familyName);
+    final scored = scoreLocally(q, eaters, restaurants, reviews, familyName).take(3).toList();
     setState(() {
-      aiResults = scored.take(3).toList();
+      aiResults = scored;
       aiLoading = false;
     });
+    _aiCache[key] = scored;
   }
 
   void snack(String msg) {
@@ -406,6 +763,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                     editingMemberId = null;
                   });
                   Navigator.pop(context);
+                  syncFamilyToCloud();
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.danger,
@@ -454,6 +812,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                   editingMemberId = null;
                 });
                 Navigator.pop(context);
+                syncFamilyToCloud();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.sageDark,
@@ -520,6 +879,21 @@ class _FamiliaRootState extends State<FamiliaRoot> {
               const SectionLabel('Emirate'),
               const SizedBox(height: 8),
               singleRow('emirate', [('any', 'All Emirates'), ...kEmirates.map((e) => (e, e))]),
+              const SizedBox(height: 14),
+              const SectionLabel('Saved'),
+              const SizedBox(height: 8),
+              Wrap(
+                children: [
+                  SelectChip(
+                    label: '★ Favorited',
+                    on: filters.favoritesOnly,
+                    tap: () {
+                      setState(() => filters.favoritesOnly = !filters.favoritesOnly);
+                      setSheet(() {});
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 14),
               const SectionLabel('Price / person'),
               const SizedBox(height: 8),
@@ -604,25 +978,48 @@ class _FamiliaRootState extends State<FamiliaRoot> {
       }
       inlineOpen = true;
       inlineComment.clear();
+      inlineComments = {};
+      inlineIndividual = false;
+      inlineStep = 0;
       if (members.isEmpty) {
-        inlineRatings = {'__guest__|Guest': 0};
+        inlineRatings = {'__guest__': 0};
       } else {
-        inlineRatings = {for (final m in members) '${m.id}|${m.name}': 0};
+        inlineRatings = {for (final m in members) m.id: 0};
       }
     });
   }
 
   void submitInline() {
-    final ids = inlineRatings.keys.where((k) => (inlineRatings[k] ?? 0) > 0).toList();
-    if (ids.isEmpty) {
+    final entries = inlineEntries();
+    if (inlineIndividual) {
+      final missing = [for (final e in entries) if ((inlineRatings[e.$1] ?? 0) == 0) e.$2];
+      if (missing.isNotEmpty) {
+        snack('${missing.first} still needs stars');
+        return;
+      }
+    } else if ((inlineRatings['__family__'] ?? 0) == 0) {
       snack('Tap stars to rate first');
       return;
     }
-    final avg = ids.map((k) => inlineRatings[k]!).reduce((a, b) => a + b) / ids.length;
-    final comment = inlineComment.text.trim();
-    String nameOf(String key) {
-      final parts = key.split('|');
-      return parts.length > 1 ? parts.sublist(1).join('|') : key;
+
+    late final List<MemberReview> rated;
+    late final double avg;
+    if (inlineIndividual) {
+      rated = [
+        for (final e in entries)
+          MemberReview(
+            name: e.$2,
+            rating: inlineRatings[e.$1] ?? 0,
+            comment: (inlineComments[e.$1] ?? '').trim().substring(
+                0, (inlineComments[e.$1] ?? '').trim().length.clamp(0, 180)),
+          ),
+      ];
+      avg = rated.map((m) => m.rating).reduce((a, b) => a + b) / rated.length;
+    } else {
+      final overall = inlineRatings['__family__'] ?? 0;
+      final comment = inlineComment.text.trim().substring(0, inlineComment.text.trim().length.clamp(0, 180));
+      avg = overall.toDouble();
+      rated = [MemberReview(name: 'Family', rating: overall, comment: comment)];
     }
 
     final review = FamilyReview(
@@ -631,14 +1028,15 @@ class _FamiliaRootState extends State<FamiliaRoot> {
       familyName: familyName.isEmpty ? 'Your family' : familyName,
       overall: (avg * 10).round() / 10,
       createdAt: 'Just now',
-      members: ids
-          .map((k) => MemberReview(name: nameOf(k), rating: inlineRatings[k]!, comment: comment))
-          .toList(),
+      members: rated,
     );
     setState(() {
       reviews.insert(0, review);
       inlineOpen = false;
       inlineRatings = {};
+      inlineComments = {};
+      inlineIndividual = false;
+      inlineStep = 0;
       inlineComment.clear();
     });
     saveReview(review).then((ok) {
@@ -649,8 +1047,10 @@ class _FamiliaRootState extends State<FamiliaRoot> {
   }
 
   double get nrAvg {
-    final ids = draft.who.isEmpty && members.isEmpty ? ['__guest__'] : draft.who;
-    final vals = ids.map((id) => draft.ratings[id] ?? 0).where((v) => v > 0).toList();
+    if (!draft.individual) return (draft.ratings['__family__'] ?? 0).toDouble();
+    final entries = nrEntries();
+    if (entries.isEmpty) return 0;
+    final vals = [for (final e in entries) draft.ratings[e.$1] ?? 0].where((v) => v > 0).toList();
     if (vals.isEmpty) return 0;
     return vals.reduce((a, b) => a + b) / vals.length;
   }
@@ -692,7 +1092,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
             const SizedBox(height: 16),
             SizedBox(
               width: 200,
-              child: PrimaryButton(label: 'Retry', onTap: loadData),
+              child: PrimaryButton(label: 'Retry', onTap: () => loadData()),
             ),
           ],
         ),
@@ -707,6 +1107,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
       case 'landing':
         content = LandingScreen(
           onCreate: () => go('setup', 'family'),
+          onSignIn: openSignInSheet,
           onSkip: () {
             setState(() {
               selectedEaters = members.map((m) => m.id).toSet();
@@ -720,9 +1121,14 @@ class _FamiliaRootState extends State<FamiliaRoot> {
           familyName: familyName,
           members: members,
           nameCtrl: familyNameCtrl,
+          pinCtrl: pinCtrl,
           onName: (v) => setState(() => familyName = v.trim()),
           onAdd: () => openMemberSheet(null),
           onEdit: (id) => openMemberSheet(id),
+          onSaveFamily: saveFamilyAccount,
+          saveNote: saveNote,
+          loggedIn: loggedIn,
+          onSignOut: signOut,
         );
         break;
       case 'home':
@@ -747,6 +1153,11 @@ class _FamiliaRootState extends State<FamiliaRoot> {
               quick = 'all';
               searchCtrl.clear();
             }),
+            favorites: favorites,
+            onFav: toggleFav,
+            filterCount: filterBadge,
+            syncedText: syncedText,
+            onRefresh: () => loadData(silent: true),
           );
         }
         break;
@@ -759,16 +1170,24 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                 reviews: reviews,
                 memberCount: members.length,
                 inlineOpen: inlineOpen,
+                isFav: favorites.contains(r.id),
+                onFav: () => toggleFav(r.id),
+                inlineEntries: inlineEntries(),
                 inlineRatings: inlineRatings,
+                inlineComments: inlineComments,
+                inlineIndividual: inlineIndividual,
+                inlineStep: inlineStep,
                 inlineComment: inlineComment,
                 onBack: (_) => go('home', 'home'),
                 onToggleInline: toggleInline,
-                onStar: (coded) {
-                  final idx = coded.lastIndexOf(':');
-                  final key = coded.substring(0, idx);
-                  final n = int.parse(coded.substring(idx + 1));
-                  setState(() => inlineRatings[key] = n);
-                },
+                onStar: (id, n) => setState(() => inlineRatings[id] = n),
+                onInlineComment: (id, t) => inlineComments[id] = t,
+                onOverallComment: (_) {},
+                onToggleIndividual: (v) => setState(() {
+                  inlineIndividual = v;
+                  inlineStep = 0;
+                }),
+                onStep: (i) => setState(() => inlineStep = i),
                 onSubmitInline: submitInline,
               );
         break;
@@ -781,8 +1200,9 @@ class _FamiliaRootState extends State<FamiliaRoot> {
           billCtrl: nrBill,
           commentCtrl: nrComment,
           refresh: () => setState(() {}),
-          onClear: resetNrForm,
+          onClear: confirmClear,
           onSubmit: submitNewRestaurant,
+          onPickPhoto: pickPhoto,
         );
         break;
       case 'ai':
@@ -834,7 +1254,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
               children: [
                 Expanded(child: content),
                 if (showReviewFoot)
-                  ReviewFooter(avg: nrAvg, onClear: resetNrForm, onSubmit: submitNewRestaurant),
+                  ReviewFooter(avg: nrAvgValue(), onClear: confirmClear, onSubmit: submitNewRestaurant),
                 if (showNav) FamiliaBottomNav(current: nav, onNav: onNav),
               ],
             ),

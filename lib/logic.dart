@@ -33,6 +33,8 @@ Color avatarColor(int i) {
   return palette[i % palette.length];
 }
 
+String cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
 String greetingFor(String familyName) {
   final hr = DateTime.now().hour;
   final g = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
@@ -44,6 +46,7 @@ List<Restaurant> getFiltered(
   required String search,
   required String quick,
   required Filters filters,
+  Set<String> favorites = const {},
 }) {
   var list = List<Restaurant>.of(all);
   final q = search.toLowerCase().trim();
@@ -55,9 +58,14 @@ List<Restaurant> getFiltered(
   if (quick != 'all') {
     final qq = quick.toLowerCase();
     list = list
-        .where((r) => ('${r.tags.join(' ')} ${r.cuisine} ${r.price}').toLowerCase().contains(qq))
+        .where((r) =>
+            ('${r.tags.join(' ')} ${r.cuisine} ${r.price}').toLowerCase().contains(qq) ||
+            (quick == 'Under AED 50' && r.priceNum <= 50))
         .toList();
     list.sort((a, b) => b.rating.compareTo(a.rating));
+  }
+  if (filters.favoritesOnly) {
+    list = list.where((r) => favorites.contains(r.id)).toList();
   }
   if (filters.emirate != 'any') {
     list = list.where((r) => emirateOf(r) == filters.emirate).toList();

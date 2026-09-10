@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^6.3.1
   http: ^1.2.2
+  shared_preferences: ^2.5.5
+  image_picker: ^1.2.2
+  dotted_border: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -58,6 +61,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Bundled display/body fonts (latin subsets). google_fonts resolves these
+  # from the asset bundle before hitting the network, so the app and its
+  # tests render deterministically, including offline.
+  assets:
+    - assets/fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

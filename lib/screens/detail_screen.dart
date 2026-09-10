@@ -10,11 +10,21 @@ class DetailScreen extends StatelessWidget {
   final List<FamilyReview> reviews;
   final int memberCount;
   final bool inlineOpen;
+  final bool isFav;
+  final VoidCallback onFav;
+  final List<(String, String)> inlineEntries;
   final Map<String, int> inlineRatings;
+  final Map<String, String> inlineComments;
+  final bool inlineIndividual;
+  final int inlineStep;
   final TextEditingController inlineComment;
   final ValueChanged<String> onBack;
   final VoidCallback onToggleInline;
-  final ValueChanged<String> onStar;
+  final void Function(String id, int n) onStar;
+  final void Function(String id, String text) onInlineComment;
+  final ValueChanged<String> onOverallComment;
+  final ValueChanged<bool> onToggleIndividual;
+  final ValueChanged<int> onStep;
   final VoidCallback onSubmitInline;
   const DetailScreen({
     super.key,
@@ -22,11 +32,21 @@ class DetailScreen extends StatelessWidget {
     required this.reviews,
     required this.memberCount,
     required this.inlineOpen,
+    required this.isFav,
+    required this.onFav,
+    required this.inlineEntries,
     required this.inlineRatings,
+    required this.inlineComments,
+    required this.inlineIndividual,
+    required this.inlineStep,
     required this.inlineComment,
     required this.onBack,
     required this.onToggleInline,
     required this.onStar,
+    required this.onInlineComment,
+    required this.onOverallComment,
+    required this.onToggleIndividual,
+    required this.onStep,
     required this.onSubmitInline,
   });
 
@@ -64,17 +84,24 @@ class DetailScreen extends StatelessWidget {
                 Positioned(
                   top: 12,
                   left: 12,
-                  child: GestureDetector(
-                    onTap: () => onBack(''),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.inputBorder)),
-                      child: const Icon(Icons.arrow_back, size: 18, color: AppColors.sageDark),
-                    ),
+                  right: 12,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => onBack(''),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.inputBorder)),
+                          child: const Icon(Icons.arrow_back, size: 18, color: AppColors.sageDark),
+                        ),
+                      ),
+                      HeartButton(fav: isFav, tap: onFav),
+                    ],
                   ),
                 ),
                 Positioned(
@@ -84,7 +111,7 @@ class DetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(r.name, style: displayCaveat(size: 32, color: Colors.white)),
+                      Text(cap(r.name), style: displayCaveat(size: 32, color: Colors.white)),
                       const SizedBox(height: 5),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.center,
@@ -95,7 +122,7 @@ class DetailScreen extends StatelessWidget {
                           Text('${r.rating.toStringAsFixed(1)} / 5',
                               style: GoogleFonts.inter(
                                   fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
-                          Text('• ${r.cuisine}',
+                          Text('• ${cap(r.cuisine)}',
                               style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
@@ -109,7 +136,7 @@ class DetailScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -129,7 +156,7 @@ class DetailScreen extends StatelessWidget {
                     border: Border.all(color: const Color(0xFFECE9E6)),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: Text(r.desc,
+                  child: Text(cap(r.desc),
                       style: GoogleFonts.inter(fontSize: 13.5, height: 1.6, color: const Color(0xFF3A3A45))),
                 ),
                 const SizedBox(height: 14),
@@ -142,7 +169,7 @@ class DetailScreen extends StatelessWidget {
                   childAspectRatio: 1.55,
                   children: [
                     _info('Price / person', r.price, 'Avg. spend'),
-                    _info('Opening hours', r.hours, 'Daily'),
+                    _info('Opening hours', r.hours, r.hours == '—' ? '' : 'Daily'),
                     _info('Average wait', r.wait, 'Family avg.'),
                     _info('Seating', r.seating.join(' + '),
                         r.seating.contains('Outdoor') ? 'Garden terrace' : 'Indoor only'),
@@ -188,12 +215,39 @@ class DetailScreen extends StatelessWidget {
                 ),
                 if (inlineOpen) ...[
                   const SizedBox(height: 12),
-                  _InlineReview(
-                    ratings: inlineRatings,
-                    comment: inlineComment,
-                    onStar: onStar,
-                    onSubmit: onSubmitInline,
-                  ),
+                  Builder(builder: (context) {
+                    final iwEntries = inlineEntries;
+                    return Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: AppColors.line),
+                          borderRadius: BorderRadius.circular(14)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SectionLabel('Your ratings'),
+                          const SizedBox(height: 12),
+                          FamilyRatingInput(
+                            entries: iwEntries,
+                            ratings: inlineRatings,
+                            comments: inlineComments,
+                            individual: inlineIndividual,
+                            step: inlineStep,
+                            overallComment: inlineComment,
+                            onToggleIndividual: onToggleIndividual,
+                            onRate: onStar,
+                            onComment: onInlineComment,
+                            onOverallComment: onOverallComment,
+                            onStep: onStep,
+                          ),
+                          const SizedBox(height: 12),
+                          PrimaryButton(
+                              label: 'Submit review', onTap: onSubmitInline, mintStyle: true),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
                 const SizedBox(height: 14),
                 Row(
@@ -211,10 +265,6 @@ class DetailScreen extends StatelessWidget {
                           style: GoogleFonts.inter(
                               fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
                     ),
-                    const Spacer(),
-                    Text('Newest first',
-                        style: GoogleFonts.inter(
-                            fontSize: 12, color: const Color(0xFF8B8B97), fontWeight: FontWeight.w600)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -251,7 +301,7 @@ class DetailScreen extends StatelessWidget {
                               Row(
                                 children: [
                                   Expanded(
-                                      child: Text(fr.familyName,
+                                      child: Text(cap(fr.familyName),
                                           style: GoogleFonts.inter(
                                               fontSize: 14, fontWeight: FontWeight.w800))),
                                   Container(
@@ -291,7 +341,7 @@ class DetailScreen extends StatelessWidget {
                                         Row(
                                           children: [
                                             Expanded(
-                                                child: Text(m.name,
+                                                child: Text(cap(m.name),
                                                     style: GoogleFonts.inter(
                                                         fontSize: 13, fontWeight: FontWeight.w700))),
                                             Text(stars(m.rating),
@@ -368,71 +418,6 @@ class DetailScreen extends StatelessWidget {
           if (sub.isNotEmpty)
             Text(sub,
                 style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF8B8B97), height: 1.3)),
-        ],
-      ),
-    );
-  }
-}
-
-class _InlineReview extends StatelessWidget {
-  final Map<String, int> ratings;
-  final TextEditingController comment;
-  final ValueChanged<String> onStar;
-  final VoidCallback onSubmit;
-  const _InlineReview({required this.ratings, required this.comment, required this.onStar, required this.onSubmit});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-          color: Colors.white, border: Border.all(color: AppColors.line), borderRadius: BorderRadius.circular(14)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SectionLabel('Your ratings'),
-          const SizedBox(height: 12),
-          ...ratings.keys.map((id) {
-            final parts = id.split('|');
-            final name = parts.length > 1 ? parts.sublist(1).join('|') : id;
-            final val = ratings[id] ?? 0;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: const Color(0xFFF6FAF4),
-                    border: Border.all(color: const Color(0xFFE3EDE1)),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.sageDark),
-                      alignment: Alignment.center,
-                      child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
-                          style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w800, fontSize: 12, color: Colors.white)),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                        child: Text(name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700))),
-                    StarRow(value: val, onPick: (n) => onStar('$id:$n')),
-                  ],
-                ),
-              ),
-            );
-          }),
-          const SizedBox(height: 4),
-          const SectionLabel('Comment (shared, optional)'),
-          const SizedBox(height: 8),
-          FamiliaArea(controller: comment, hint: 'What did the family think?'),
-          const SizedBox(height: 12),
-          PrimaryButton(label: 'Submit review', onTap: onSubmit, mintStyle: true),
         ],
       ),
     );

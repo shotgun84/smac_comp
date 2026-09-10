@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme.dart';
 
@@ -45,6 +46,8 @@ class FamiliaInput extends StatelessWidget {
   final int maxLength;
   final TextInputType keyboard;
   final ValueChanged<String>? onChanged;
+  final List<TextInputFormatter>? formatters;
+  final bool obscure;
   const FamiliaInput({
     super.key,
     required this.controller,
@@ -52,6 +55,8 @@ class FamiliaInput extends StatelessWidget {
     this.maxLength = 100,
     this.keyboard = TextInputType.text,
     this.onChanged,
+    this.formatters,
+    this.obscure = false,
   });
 
   @override
@@ -60,6 +65,8 @@ class FamiliaInput extends StatelessWidget {
       controller: controller,
       maxLength: maxLength,
       keyboardType: keyboard,
+      inputFormatters: formatters,
+      obscureText: obscure,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
@@ -85,7 +92,8 @@ class FamiliaInput extends StatelessWidget {
 class FamiliaArea extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
-  const FamiliaArea({super.key, required this.controller, required this.hint});
+  final int? maxLength;
+  const FamiliaArea({super.key, required this.controller, required this.hint, this.maxLength});
 
   @override
   Widget build(BuildContext context) {
@@ -93,12 +101,14 @@ class FamiliaArea extends StatelessWidget {
       controller: controller,
       maxLines: 3,
       minLines: 2,
+      maxLength: maxLength,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 14),
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.all(14),
+        counterStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.muted2, fontWeight: FontWeight.w600),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.inputBorder, width: 1.5),
@@ -109,6 +119,203 @@ class FamiliaArea extends StatelessWidget {
         ),
       ),
       style: GoogleFonts.inter(fontSize: 14, color: AppColors.ink),
+    );
+  }
+}
+
+class HeartButton extends StatelessWidget {
+  final bool fav;
+  final VoidCallback tap;
+  const HeartButton({super.key, required this.fav, required this.tap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: tap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.inputBorder),
+        ),
+        child: Icon(
+          fav ? Icons.favorite : Icons.favorite_border,
+          size: 18,
+          color: fav ? const Color(0xFFC0392B) : AppColors.sageDark,
+        ),
+      ),
+    );
+  }
+}
+
+class FamilyRatingInput extends StatelessWidget {
+  final List<(String, String)> entries;
+  final Map<String, int> ratings;
+  final Map<String, String> comments;
+  final bool individual;
+  final int step;
+  final TextEditingController overallComment;
+  final ValueChanged<bool> onToggleIndividual;
+  final void Function(String id, int n) onRate;
+  final void Function(String id, String text) onComment;
+  final ValueChanged<String> onOverallComment;
+  final ValueChanged<int> onStep;
+
+  const FamilyRatingInput({
+    super.key,
+    required this.entries,
+    required this.ratings,
+    required this.comments,
+    required this.individual,
+    required this.step,
+    required this.overallComment,
+    required this.onToggleIndividual,
+    required this.onRate,
+    required this.onComment,
+    required this.onOverallComment,
+    required this.onStep,
+  });
+
+  InputDecoration _commentDec() => InputDecoration(
+        hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 14),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.all(14),
+        counterStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.muted2, fontWeight: FontWeight.w600),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: AppColors.sageDark, width: 1.5),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => onToggleIndividual(!individual),
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: individual ? AppColors.sageDark : Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                      color: individual ? AppColors.sageDark : AppColors.inputBorder, width: 1.5),
+                ),
+                child: individual
+                    ? const Icon(Icons.check, size: 14, color: Colors.white)
+                    : null,
+              ),
+              const SizedBox(width: 8),
+              Text('Each person rates separately',
+                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (!individual) ...[
+          StarRow(value: ratings['__family__'] ?? 0, onPick: (n) => onRate('__family__', n)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: overallComment,
+            onChanged: onOverallComment,
+            maxLines: 3,
+            minLines: 2,
+            maxLength: 180,
+            decoration: _commentDec().copyWith(hintText: 'What did the family think?'),
+            style: GoogleFonts.inter(fontSize: 14, color: AppColors.ink),
+          ),
+        ] else if (entries.isEmpty) ...[
+          Text('Add who went above to rate individually.',
+              style: GoogleFonts.inter(
+                  fontSize: 12.5, color: const Color(0xFF8B8B97), fontWeight: FontWeight.w600)),
+        ] else ...[
+          Builder(builder: (context) {
+            final idx = step.clamp(0, entries.length - 1);
+            final (id, name) = entries[idx];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Member ${idx + 1} of ${entries.length}',
+                    style: GoogleFonts.inter(
+                        fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.6, color: AppColors.muted)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.sageDark),
+                      alignment: Alignment.center,
+                      child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w800, fontSize: 12, color: Colors.white)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                        child: Text(name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w800))),
+                    StarRow(value: ratings[id] ?? 0, onPick: (n) => onRate(id, n)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  key: ValueKey('c_$id'),
+                  initialValue: comments[id] ?? '',
+                  onChanged: (v) => onComment(id, v),
+                  maxLines: 2,
+                  minLines: 2,
+                  maxLength: 180,
+                  decoration: _commentDec().copyWith(hintText: 'What did $name think? (optional)'),
+                  style: GoogleFonts.inter(fontSize: 14, color: AppColors.ink),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    if (idx > 0) Expanded(child: GhostButton(label: 'Back', onTap: () => onStep(idx - 1))),
+                    if (idx > 0) const SizedBox(width: 10),
+                    if (idx < entries.length - 1)
+                      Expanded(
+                        child: Opacity(
+                          opacity: (ratings[id] ?? 0) > 0 ? 1 : 0.5,
+                          child: PrimaryButton(
+                            label: 'Next',
+                            onTap: (ratings[id] ?? 0) > 0 ? () => onStep(idx + 1) : () {},
+                          ),
+                        ),
+                      ),
+                    if (idx == entries.length - 1)
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          alignment: Alignment.center,
+                          child: Text('Last member — use submit below',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                  fontSize: 12, color: AppColors.muted, fontWeight: FontWeight.w600)),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            );
+          }),
+        ],
+      ],
     );
   }
 }

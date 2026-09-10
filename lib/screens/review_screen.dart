@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data.dart';
 import '../models.dart';
@@ -15,6 +16,7 @@ class ReviewScreen extends StatelessWidget {
   final VoidCallback refresh;
   final VoidCallback onClear;
   final VoidCallback onSubmit;
+  final VoidCallback onPickPhoto;
   const ReviewScreen({
     super.key,
     required this.draft,
@@ -26,7 +28,16 @@ class ReviewScreen extends StatelessWidget {
     required this.refresh,
     required this.onClear,
     required this.onSubmit,
+    required this.onPickPhoto,
   });
+
+  List<(String, String)> nrEntries() {
+    if (members.isEmpty) return [('__guest__', 'Guest')];
+    return [
+      for (final id in draft.who)
+        (id, members.where((m) => m.id == id).firstOrNull?.name ?? 'Guest'),
+    ];
+  }
 
   void toggleList(List<String> list, String v) {
     if (list.contains(v)) {
@@ -73,7 +84,7 @@ class ReviewScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 150),
             child: Column(
               children: [
                 WhiteCard(
@@ -87,22 +98,39 @@ class ReviewScreen extends StatelessWidget {
                       const SizedBox(height: 14),
                       const SectionLabel('Photo'),
                       const SizedBox(height: 8),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.inputBorder, width: 1.5),
-                          borderRadius: BorderRadius.circular(10),
-                          color: const Color(0xFFF6FAF4),
-                        ),
-                        child: Column(
-                          children: [
-                            const Icon(Icons.add_a_photo_outlined, size: 22, color: AppColors.muted),
-                            const SizedBox(height: 8),
-                            Text('Photos attach on device builds',
-                                style: GoogleFonts.inter(
-                                    fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.muted)),
-                          ],
+                      GestureDetector(
+                        onTap: onPickPhoto,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: double.infinity,
+                          padding: draft.photoBytes.isEmpty ? const EdgeInsets.all(18) : EdgeInsets.zero,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.inputBorder, width: 1.5),
+                            borderRadius: BorderRadius.circular(10),
+                            color: const Color(0xFFF6FAF4),
+                          ),
+                          child: draft.photoBytes.isEmpty
+                              ? Column(
+                                  children: [
+                                    const Icon(Icons.add_a_photo_outlined,
+                                        size: 22, color: AppColors.muted),
+                                    const SizedBox(height: 8),
+                                    Text('Tap to add a photo',
+                                        style: GoogleFonts.inter(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.muted)),
+                                  ],
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(9),
+                                  child: Image.memory(
+                                    Uint8List.fromList(draft.photoBytes),
+                                    width: double.infinity,
+                                    height: 190,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -238,8 +266,12 @@ class ReviewScreen extends StatelessWidget {
                                     style: GoogleFonts.inter(
                                         fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.muted)),
                                 const SizedBox(height: 8),
-                                FamiliaInput(controller: billCtrl, hint: 'e.g. 180',
-                                    keyboard: TextInputType.number, maxLength: 7,
+                                FamiliaInput(
+                                    controller: billCtrl,
+                                    hint: 'e.g. 180',
+                                    keyboard: TextInputType.number,
+                                    maxLength: 7,
+                                    formatters: [FilteringTextInputFormatter.digitsOnly],
                                     onChanged: (v) {
                                       draft.bill = v;
                                       refresh();
@@ -338,18 +370,29 @@ class ReviewScreen extends StatelessWidget {
                       const SizedBox(height: 14),
                       const SectionLabel('Family ratings'),
                       const SizedBox(height: 8),
-                      ..._ratingRows(),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          const SectionLabel('What stood out? '),
-                          Text('(shared)',
-                              style: GoogleFonts.inter(
-                                  fontSize: 11, color: const Color(0xFFACACB8), fontWeight: FontWeight.w500)),
-                        ],
+                      FamilyRatingInput(
+                        entries: nrEntries(),
+                        ratings: draft.ratings,
+                        comments: draft.comments,
+                        individual: draft.individual,
+                        step: draft.step,
+                        overallComment: commentCtrl,
+                        onToggleIndividual: (v) {
+                          draft.individual = v;
+                          draft.step = 0;
+                          refresh();
+                        },
+                        onRate: (id, n) {
+                          draft.ratings[id] = n;
+                          refresh();
+                        },
+                        onComment: (id, t) => draft.comments[id] = t,
+                        onOverallComment: (v) => draft.comment = v,
+                        onStep: (i) {
+                          draft.step = i;
+                          refresh();
+                        },
                       ),
-                      const SizedBox(height: 8),
-                      FamiliaArea(controller: commentCtrl, hint: 'One short note the whole family agrees on…'),
                     ],
                   ),
                 ),
@@ -359,60 +402,6 @@ class ReviewScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  List<Widget> _ratingRows() {
-    final ids = draft.who.isEmpty && members.isEmpty ? ['__guest__|Guest'] : draft.who.map((id) {
-      final m = members.where((x) => x.id == id).firstOrNull;
-      return '$id|${m?.name ?? 'Guest'}';
-    }).toList();
-    if (members.isNotEmpty && draft.who.isEmpty) {
-      return [
-        Text('Select who went above.',
-            style:
-                GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFF8B8B97), fontWeight: FontWeight.w600))
-      ];
-    }
-    return ids.map((key) {
-      final name = key.split('|').length > 1 ? key.split('|').sublist(1).join('|') : key;
-      final id = key.split('|').first;
-      final val = draft.ratings[id] ?? 0;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              color: const Color(0xFFF6FAF4),
-              border: Border.all(color: const Color(0xFFE3EDE1)),
-              borderRadius: BorderRadius.circular(10)),
-          child: Row(
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.sageDark),
-                alignment: Alignment.center,
-                child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
-                    style:
-                        GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.white)),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Text(name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700))),
-              StarRow(
-                  value: val,
-                  onPick: (n) {
-                    draft.ratings[id] = n;
-                    refresh();
-                  }),
-            ],
-          ),
-        ),
-      );
-    }).toList();
   }
 
   Widget _step(String label, VoidCallback tap) {

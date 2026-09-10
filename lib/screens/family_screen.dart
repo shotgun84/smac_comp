@@ -1,3 +1,4 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../logic.dart';
@@ -9,17 +10,27 @@ class FamilyScreen extends StatelessWidget {
   final String familyName;
   final List<FamilyMember> members;
   final TextEditingController nameCtrl;
+  final TextEditingController pinCtrl;
   final ValueChanged<String> onName;
   final VoidCallback onAdd;
   final ValueChanged<String> onEdit;
+  final VoidCallback onSaveFamily;
+  final String saveNote;
+  final bool loggedIn;
+  final VoidCallback onSignOut;
   const FamilyScreen({
     super.key,
     required this.familyName,
     required this.members,
     required this.nameCtrl,
+    required this.pinCtrl,
     required this.onName,
     required this.onAdd,
     required this.onEdit,
+    required this.onSaveFamily,
+    required this.saveNote,
+    required this.loggedIn,
+    required this.onSignOut,
   });
 
   @override
@@ -50,7 +61,7 @@ class FamilyScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 100),
             child: Column(
               children: [
                 WhiteCard(
@@ -153,7 +164,7 @@ class FamilyScreen extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(m.name.isEmpty ? 'Unnamed' : m.name,
+                                          Text(m.name.isEmpty ? 'Unnamed' : cap(m.name),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700)),
@@ -181,19 +192,26 @@ class FamilyScreen extends StatelessWidget {
                           );
                         }),
                       const SizedBox(height: 2),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: onAdd,
-                          icon: const Icon(Icons.add, size: 16),
-                          label: Text('Add family member',
-                              style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14)),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.sageDark,
-                            backgroundColor: const Color(0xFFEDF5EA),
-                            minimumSize: const Size.fromHeight(50),
-                            side: const BorderSide(color: AppColors.mintBorder, width: 1.5, style: BorderStyle.solid),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      DottedBorder(
+                        options: RoundedRectDottedBorderOptions(
+                          radius: const Radius.circular(10),
+                          color: AppColors.mintBorder,
+                          strokeWidth: 1.5,
+                          dashPattern: const [6, 4],
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: TextButton.icon(
+                            onPressed: onAdd,
+                            icon: const Icon(Icons.add, size: 16),
+                            label: Text('Add family member',
+                                style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14)),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.sageDark,
+                              backgroundColor: const Color(0xFFEDF5EA),
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
                           ),
                         ),
                       ),
@@ -210,6 +228,47 @@ class FamilyScreen extends StatelessWidget {
                               style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.muted)),
                         ],
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                WhiteCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SectionLabel('Family account'),
+                      const SizedBox(height: 10),
+                      FamiliaInput(
+                        controller: pinCtrl,
+                        hint: 'Family PIN (4+ characters)',
+                        maxLength: 24,
+                        keyboard: TextInputType.visiblePassword,
+                        obscure: true,
+                      ),
+                      const SizedBox(height: 6),
+                      Text('Same name + PIN signs you in on any device.',
+                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFA9A9B6), height: 1.4)),
+                      const SizedBox(height: 12),
+                      PrimaryButton(label: 'Save family', onTap: onSaveFamily),
+                      if (saveNote.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(saveNote,
+                            style: GoogleFonts.inter(
+                                fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.sageDark)),
+                      ],
+                      if (loggedIn) ...[
+                        const SizedBox(height: 4),
+                        Center(
+                          child: TextButton(
+                            onPressed: onSignOut,
+                            child: Text('Sign out',
+                                style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.danger)),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -104,6 +104,7 @@ class Filters {
   String rating;
   List<String> cuisines;
   List<String> dietary;
+  bool favoritesOnly;
 
   Filters({
     this.emirate = 'any',
@@ -111,6 +112,7 @@ class Filters {
     this.rating = 'any',
     List<String>? cuisines,
     List<String>? dietary,
+    this.favoritesOnly = false,
   })  : cuisines = cuisines ?? [],
         dietary = dietary ?? [];
 
@@ -120,6 +122,7 @@ class Filters {
         rating: rating,
         cuisines: List.of(cuisines),
         dietary: List.of(dietary),
+        favoritesOnly: favoritesOnly,
       );
 
   void clear() {
@@ -128,7 +131,33 @@ class Filters {
     rating = 'any';
     cuisines.clear();
     dietary.clear();
+    favoritesOnly = false;
   }
+
+  int get activeCount {
+    var n = 0;
+    if (emirate != 'any') n++;
+    if (price != 'any') n++;
+    if (rating != 'any') n++;
+    n += cuisines.length + dietary.length;
+    if (favoritesOnly) n++;
+    return n;
+  }
+}
+
+class FamilyAccount {
+  String name;
+  String pin;
+  List<FamilyMember> members;
+  List<String> favorites;
+
+  FamilyAccount({
+    required this.name,
+    required this.pin,
+    List<FamilyMember>? members,
+    List<String>? favorites,
+  })  : members = members ?? [],
+        favorites = favorites ?? [];
 }
 
 class Scored {
@@ -163,5 +192,9 @@ class NewRestaurantDraft {
   List<String> tags = [];
   List<String> who = [];
   Map<String, int> ratings = {};
+  Map<String, String> comments = {};
   String comment = '';
+  bool individual = false;
+  int step = 0;
+  List<int> photoBytes = [];
 }

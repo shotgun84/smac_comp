@@ -17,6 +17,11 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onFilters;
   final ValueChanged<String> onOpen;
   final VoidCallback onClearFilters;
+  final Set<String> favorites;
+  final ValueChanged<String> onFav;
+  final int filterCount;
+  final String syncedText;
+  final Future<void> Function() onRefresh;
   const HomeScreen({
     super.key,
     required this.greeting,
@@ -29,12 +34,21 @@ class HomeScreen extends StatelessWidget {
     required this.onFilters,
     required this.onOpen,
     required this.onClearFilters,
+    required this.favorites,
+    required this.onFav,
+    required this.filterCount,
+    required this.syncedText,
+    required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return RefreshIndicator(
+      color: AppColors.sageDark,
+      onRefresh: onRefresh,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
@@ -85,15 +99,38 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: onFilters,
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: AppColors.sageDark,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                        ),
-                        child: const Icon(Icons.tune, size: 18, color: Colors.white),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: AppColors.sageDark,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                            ),
+                            child: const Icon(Icons.tune, size: 18, color: Colors.white),
+                          ),
+                          if (filterCount > 0)
+                            Positioned(
+                              right: -6,
+                              top: -6,
+                              child: Container(
+                                width: 22,
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE07B39),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text('$filterCount',
+                                    style: GoogleFonts.inter(
+                                        fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -131,7 +168,21 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 10, 18, 24),
+            padding: const EdgeInsets.fromLTRB(18, 6, 18, 0),
+            child: Row(
+              children: [
+                Text('${items.length} spot${items.length == 1 ? '' : 's'}',
+                    style: GoogleFonts.inter(
+                        fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.muted)),
+                const Spacer(),
+                Text(syncedText,
+                    style: GoogleFonts.inter(
+                        fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.muted2)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 100),
             child: items.isEmpty
                 ? Container(
                     padding: const EdgeInsets.all(22),
@@ -195,6 +246,14 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Positioned(
+                                      top: 12,
+                                      left: 12,
+                                      child: HeartButton(
+                                        fav: favorites.contains(r.id),
+                                        tap: () => onFav(r.id),
+                                      ),
+                                    ),
+                                    Positioned(
                                       bottom: 12,
                                       right: 12,
                                       child: Container(
@@ -226,7 +285,7 @@ class HomeScreen extends StatelessWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
-                                            child: Text(r.name,
+                                            child: Text(cap(r.name),
                                                 style: GoogleFonts.inter(
                                                     fontSize: 15,
                                                     fontWeight: FontWeight.w800,
@@ -259,7 +318,7 @@ class HomeScreen extends StatelessWidget {
                                         spacing: 6,
                                         runSpacing: 4,
                                         children: [
-                                          Text(r.cuisine,
+                                          Text(cap(r.cuisine),
                                               style: GoogleFonts.inter(
                                                   fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.ink)),
                                           Container(width: 3, height: 3, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.inputBorder)),
@@ -289,6 +348,7 @@ class HomeScreen extends StatelessWidget {
                   ),
           ),
         ],
+        ),
       ),
     );
   }

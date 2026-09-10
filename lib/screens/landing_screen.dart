@@ -6,8 +6,9 @@ import '../widgets/familia_widgets.dart';
 
 class LandingScreen extends StatelessWidget {
   final VoidCallback onCreate;
+  final VoidCallback onSignIn;
   final VoidCallback onSkip;
-  const LandingScreen({super.key, required this.onCreate, required this.onSkip});
+  const LandingScreen({super.key, required this.onCreate, required this.onSignIn, required this.onSkip});
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +84,25 @@ class LandingScreen extends StatelessWidget {
                     textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15),
                   ),
                   child: const Text('Create your family'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onSignIn,
+                  icon: const Icon(Icons.login, size: 18),
+                  label: Text('Sign in',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 15)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mint,
+                    foregroundColor: AppColors.chipText,
+                    minimumSize: const Size.fromHeight(54),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                        side: const BorderSide(color: AppColors.mintBorder)),
+                    elevation: 0,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

@@ -98,7 +98,7 @@ Map<String, dynamic> reviewToRow(FamilyReview rv) => {
 Future<List<Restaurant>> fetchRestaurants() async {
   final res = await http
       .get(
-        Uri.parse('$kSupabaseUrl/rest/v1/restaurants?select=*&order=sort_order.asc'),
+        Uri.parse('$kSupabaseUrl/rest/v1/restaurants?select=*&order=created.desc'),
         headers: _sbHeaders,
       )
       .timeout(const Duration(seconds: 9));
@@ -111,7 +111,7 @@ Future<List<Restaurant>> fetchRestaurants() async {
 Future<List<FamilyReview>> fetchReviews() async {
   final res = await http
       .get(
-        Uri.parse('$kSupabaseUrl/rest/v1/family_reviews?select=*'),
+        Uri.parse('$kSupabaseUrl/rest/v1/family_reviews?select=*&order=created.desc'),
         headers: _sbHeaders,
       )
       .timeout(const Duration(seconds: 9));
@@ -134,6 +134,88 @@ Future<bool> saveRestaurant(Restaurant r) async {
   } catch (_) {
     return false;
   }
+}
+
+FamilyAccount familyFromRow(Map<String, dynamic> w) {
+  final raw = ((w['members'] as List?) ?? []);
+  var i = 0;
+  return FamilyAccount(
+    name: w['name']?.toString() ?? '',
+    pin: w['pin']?.toString() ?? '',
+    members: raw.map((m) {
+      final map = (m as Map).cast<String, dynamic>();
+      i++;
+      return FamilyMember(
+        id: 'lx_$i',
+        name: map['name']?.toString() ?? '',
+        dietary: _strList(map['dietary']),
+        allergies: _strList(map['allergies']),
+        prefs: _strList(map['prefs']),
+      );
+    }).toList(),
+    favorites: _strList(w['favorites']),
+  );
+}
+
+Map<String, dynamic> familyToRow(FamilyAccount a) => {
+      'name': a.name,
+      'pin': a.pin,
+      'members': a.members
+          .map((m) => {
+                'name': m.name,
+                'dietary': m.dietary,
+                'allergies': m.allergies,
+                'prefs': m.prefs,
+              })
+          .toList(),
+      'favorites': a.favorites,
+    };
+
+Future<FamilyAccount?> fetchFamily(String name) async {
+  final res = await http
+      .get(
+        Uri.parse('$kSupabaseUrl/rest/v1/families?select=*&name=eq.${Uri.encodeComponent(name)}'),
+        headers: _sbHeaders,
+      )
+      .timeout(const Duration(seconds: 9));
+  if (res.statusCode != 200) throw Exception('Supabase ${res.statusCode}');
+  final data = jsonDecode(res.body);
+  if (data is! List || data.isEmpty) return null;
+  return familyFromRow((data.first as Map).cast<String, dynamic>());
+}
+
+Future<bool> saveFamily(FamilyAccount a) async {
+  try {
+    final res = await http
+        .post(
+          Uri.parse('$kSupabaseUrl/rest/v1/families?on_conflict=name'),
+          headers: {..._sbHeaders, 'Prefer': 'resolution=merge-duplicates'},
+          body: jsonEncode(familyToRow(a)),
+        )
+        .timeout(const Duration(seconds: 9));
+    return res.statusCode >= 200 && res.statusCode < 300;
+  } catch (_) {
+    return false;
+  }
+}
+
+Future<String> uploadPhoto(List<int> bytes, String filename) async {
+  final res = await http
+      .post(
+        Uri.parse('$kSupabaseUrl/storage/v1/object/photos/$filename'),
+        headers: {
+          'apikey': kSupabaseAnonKey,
+          'Authorization': 'Bearer $kSupabaseAnonKey',
+          'Content-Type': 'image/jpeg',
+          'x-upsert': 'true',
+        },
+        body: bytes,
+      )
+      .timeout(const Duration(seconds: 20));
+  if (res.statusCode != 200 && res.statusCode != 201) {
+    throw Exception('Upload ${res.statusCode}');
+  }
+  return '$kSupabaseUrl/storage/v1/object/public/photos/$filename';
 }
 
 Future<bool> saveReview(FamilyReview rv) async {
