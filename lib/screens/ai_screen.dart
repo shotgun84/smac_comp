@@ -34,15 +34,6 @@ class AiScreen extends StatelessWidget {
         children: [
           PageBanner(
             title: 'Family AI',
-            titleLeading: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.18),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.4))),
-              child: const Icon(Icons.smart_toy_outlined, size: 15, color: Colors.white),
-            ),
             subtitle: Text('Select who\'s eating. Allergies first, preferences second.',
                 style: bannerSub()),
           ),
