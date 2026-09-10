@@ -518,20 +518,34 @@ class FamiliaBottomNav extends StatelessWidget {
   final ValueChanged<String> onNav;
   const FamiliaBottomNav({super.key, required this.current, required this.onNav});
 
-  Widget item(BuildContext context, String key, IconData icon) {
+  Widget item(BuildContext context, String key, IconData icon, String label) {
     final on = current == key;
     return Expanded(
       child: GestureDetector(
         onTap: () => onNav(key),
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
             color: on ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, size: 26, color: on ? Colors.white : Colors.white.withValues(alpha: 0.85)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: on ? Colors.white : Colors.white.withValues(alpha: 0.85)),
+              const SizedBox(height: 3),
+              Text(
+                label.toUpperCase(),
+                style: GoogleFonts.inter(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.05 * 9,
+                  color: on ? Colors.white : Colors.white.withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -548,34 +562,10 @@ class FamiliaBottomNav extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(10, 8, 10, 8 + MediaQuery.of(context).padding.bottom),
       child: Row(
         children: [
-          item(context, 'home', Icons.explore_outlined),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => onNav('ai'),
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-                  ),
-                  child: const Icon(Icons.smart_toy_outlined,
-                      size: 18, color: Colors.white),
-                ),
-              ),
-            ),
-          ),
-          item(context, 'reviews', Icons.star_outline),
-          item(context, 'family', Icons.group_outlined),
+          item(context, 'home', Icons.explore_outlined, 'Discover'),
+          item(context, 'ai', Icons.smart_toy_outlined, 'AI'),
+          item(context, 'reviews', Icons.star_outline, 'Reviews'),
+          item(context, 'family', Icons.group_outlined, 'Family'),
         ],
       ),
     );
