@@ -9,20 +9,22 @@ class PageBanner extends StatelessWidget {
   final Widget? subtitle;
   final Widget? titleLeading;
   final Widget? bottom;
+  final bool italicTitle;
   const PageBanner({
     super.key,
     required this.title,
-    this.titleSize = 30,
+    this.titleSize = 32,
     this.subtitle,
     this.titleLeading,
     this.bottom,
+    this.italicTitle = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.sage,
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+      color: AppColors.rust,
+      padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,20 +32,23 @@ class PageBanner extends StatelessWidget {
             children: [
               if (titleLeading != null) ...[titleLeading!, const SizedBox(width: 9)],
               Expanded(
-                child: Text(title, style: displayCaveat(size: titleSize, color: Colors.white)),
+                child: Text(
+                  title,
+                  style: displayFraunces(size: titleSize, color: Colors.white, italic: italicTitle),
+                ),
               ),
             ],
           ),
-          if (subtitle != null) ...[const SizedBox(height: 6), subtitle!],
-          if (bottom != null) ...[const SizedBox(height: 14), bottom!],
+          if (subtitle != null) ...[const SizedBox(height: 8), subtitle!],
+          if (bottom != null) ...[const SizedBox(height: 16), bottom!],
         ],
       ),
     );
   }
 }
 
-TextStyle bannerSub() => GoogleFonts.inter(
-    fontSize: 12.5, color: Colors.white.withValues(alpha: 0.92), height: 1.5);
+TextStyle bannerSub() => GoogleFonts.workSans(
+    fontSize: 13.5, color: Colors.white.withValues(alpha: 0.9), height: 1.5, fontWeight: FontWeight.w500);
 
 class SectionLabel extends StatelessWidget {
   final String text;
@@ -51,38 +56,105 @@ class SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.08 * 11,
-        color: AppColors.muted,
-      ),
-    );
+    return Text(text, style: labelFraunces(size: 17));
   }
 }
 
 class WhiteCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
-  const WhiteCard({super.key, required this.child, this.padding = const EdgeInsets.all(16)});
+  final bool sharp;
+  final Color? color;
+  const WhiteCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(18),
+    this.sharp = false,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final body = Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: color ?? AppColors.creamCard,
+        borderRadius: sharp ? BorderRadius.circular(8) : BorderRadius.circular(14),
         border: Border.all(color: AppColors.line),
       ),
       padding: padding,
       child: child,
     );
+    if (sharp) return body;
+    return Ticketed(cut: 16, child: body);
   }
 }
 
-class FamiliaInput extends StatelessWidget {
+/// Tinted variant — breaks the uniform white-card rhythm.
+/// Used for Family Members so that section reads differently.
+class TintCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsets padding;
+  const TintCard({super.key, required this.child, this.padding = const EdgeInsets.all(18)});
+
+  @override
+  Widget build(BuildContext context) {
+    return Ticketed(
+      cut: 18,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.parchmentDeep,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.clayLine),
+        ),
+        padding: padding,
+        child: child,
+      ),
+    );
+  }
+}
+
+class HandDivider extends StatelessWidget {
+  final Color color;
+  const HandDivider({super.key, this.color = AppColors.clayLine});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(double.infinity, 10),
+      painter: _WavyPainter(color),
+    );
+  }
+}
+
+class _WavyPainter extends CustomPainter {
+  final Color color;
+  _WavyPainter(this.color);
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()
+      ..color = color
+      ..strokeWidth = 1.6
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    final path = Path();
+    const waves = 24;
+    for (var i = 0; i <= waves; i++) {
+      final x = size.width * i / waves;
+      final y = 5 + (i.isEven ? -2.4 : 2.4);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(path, p);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class FamiliaInput extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
   final int maxLength;
@@ -102,65 +174,127 @@ class FamiliaInput extends StatelessWidget {
   });
 
   @override
+  State<FamiliaInput> createState() => _FamiliaInputState();
+}
+
+class _FamiliaInputState extends State<FamiliaInput> {
+  final _node = FocusNode();
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _node.addListener(() => setState(() => _focused = _node.hasFocus));
+  }
+
+  @override
+  void dispose() {
+    _node.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLength: maxLength,
-      keyboardType: keyboard,
-      inputFormatters: formatters,
-      obscureText: obscure,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 14.5),
-        counterText: '',
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1.5),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.sageDark, width: 1.5),
-        ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: _focused
+            ? [BoxShadow(color: AppColors.clay.withValues(alpha: 0.35), blurRadius: 14, spreadRadius: 1)]
+            : [],
       ),
-      style: GoogleFonts.inter(fontSize: 14.5, fontWeight: FontWeight.w500, color: AppColors.ink),
+      child: TextField(
+        controller: widget.controller,
+        focusNode: _node,
+        maxLength: widget.maxLength,
+        keyboardType: widget.keyboard,
+        inputFormatters: widget.formatters,
+        obscureText: widget.obscure,
+        onChanged: widget.onChanged,
+        cursorColor: AppColors.rust,
+        decoration: InputDecoration(
+          hintText: widget.hint,
+          hintStyle: GoogleFonts.workSans(color: AppColors.muted2, fontSize: 14.5),
+          counterText: '',
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.line, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.clay, width: 2),
+          ),
+        ),
+        style: GoogleFonts.workSans(fontSize: 14.5, fontWeight: FontWeight.w500, color: AppColors.ink),
+      ),
     );
   }
 }
 
-class FamiliaArea extends StatelessWidget {
+class FamiliaArea extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
   final int? maxLength;
   const FamiliaArea({super.key, required this.controller, required this.hint, this.maxLength});
 
   @override
+  State<FamiliaArea> createState() => _FamiliaAreaState();
+}
+
+class _FamiliaAreaState extends State<FamiliaArea> {
+  final _node = FocusNode();
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _node.addListener(() => setState(() => _focused = _node.hasFocus));
+  }
+
+  @override
+  void dispose() {
+    _node.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      maxLines: 3,
-      minLines: 2,
-      maxLength: maxLength,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 14),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.all(14),
-        counterStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.muted2, fontWeight: FontWeight.w600),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1.5),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.sageDark, width: 1.5),
-        ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: _focused
+            ? [BoxShadow(color: AppColors.clay.withValues(alpha: 0.35), blurRadius: 14, spreadRadius: 1)]
+            : [],
       ),
-      style: GoogleFonts.inter(fontSize: 14, color: AppColors.ink),
+      child: TextField(
+        controller: widget.controller,
+        focusNode: _node,
+        maxLines: 3,
+        minLines: 2,
+        maxLength: widget.maxLength,
+        cursorColor: AppColors.rust,
+        decoration: InputDecoration(
+          hintText: widget.hint,
+          hintStyle: GoogleFonts.workSans(color: AppColors.muted2, fontSize: 14),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.all(16),
+          counterStyle: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted2, fontWeight: FontWeight.w600),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.line, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.clay, width: 2),
+          ),
+        ),
+        style: GoogleFonts.workSans(fontSize: 14, color: AppColors.ink),
+      ),
     );
   }
 }
@@ -176,17 +310,18 @@ class HeartButton extends StatelessWidget {
       onTap: tap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 36,
-        height: 36,
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.92),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.inputBorder),
+          color: Colors.white.withValues(alpha: 0.96),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.line),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 10)],
         ),
         child: Icon(
           fav ? Icons.favorite : Icons.favorite_border,
           size: 18,
-          color: fav ? const Color(0xFFC0392B) : AppColors.sageDark,
+          color: fav ? AppColors.rust : AppColors.ink,
         ),
       ),
     );
@@ -222,18 +357,18 @@ class FamilyRatingInput extends StatelessWidget {
   });
 
   InputDecoration _commentDec() => InputDecoration(
-        hintStyle: GoogleFonts.inter(color: AppColors.muted2, fontSize: 14),
+        hintStyle: GoogleFonts.workSans(color: AppColors.muted2, fontSize: 14),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.all(14),
-        counterStyle: GoogleFonts.inter(fontSize: 11, color: AppColors.muted2, fontWeight: FontWeight.w600),
+        contentPadding: const EdgeInsets.all(16),
+        counterStyle: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted2, fontWeight: FontWeight.w600),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.inputBorder, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.line, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.sageDark, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.clay, width: 2),
         ),
       );
 
@@ -251,18 +386,22 @@ class FamilyRatingInput extends StatelessWidget {
                 width: 22,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: individual ? AppColors.sageDark : Colors.transparent,
+                  color: individual ? AppColors.rust : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                      color: individual ? AppColors.sageDark : AppColors.inputBorder, width: 1.5),
+                      color: individual ? AppColors.rust : AppColors.line, width: 1.5),
                 ),
                 child: individual
                     ? const Icon(Icons.check, size: 14, color: Colors.white)
                     : null,
               ),
               const SizedBox(width: 8),
-              Text('Each person rates separately',
-                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700)),
+              Flexible(
+                child: Text('Each person rates separately',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.workSans(fontSize: 13, fontWeight: FontWeight.w700)),
+              ),
             ],
           ),
         ),
@@ -276,13 +415,14 @@ class FamilyRatingInput extends StatelessWidget {
             maxLines: 3,
             minLines: 2,
             maxLength: 180,
+            cursorColor: AppColors.rust,
             decoration: _commentDec().copyWith(hintText: 'What did the family think?'),
-            style: GoogleFonts.inter(fontSize: 14, color: AppColors.ink),
+            style: GoogleFonts.workSans(fontSize: 14, color: AppColors.ink),
           ),
         ] else if (entries.isEmpty) ...[
           Text('Add who went above to rate individually.',
-              style: GoogleFonts.inter(
-                  fontSize: 12.5, color: const Color(0xFF8B8B97), fontWeight: FontWeight.w600)),
+              style: GoogleFonts.workSans(
+                  fontSize: 12.5, color: AppColors.muted, fontWeight: FontWeight.w600)),
         ] else ...[
           Builder(builder: (context) {
             final idx = step.clamp(0, entries.length - 1);
@@ -291,7 +431,7 @@ class FamilyRatingInput extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Member ${idx + 1} of ${entries.length}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.workSans(
                         fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.6, color: AppColors.muted)),
                 const SizedBox(height: 8),
                 Row(
@@ -299,10 +439,10 @@ class FamilyRatingInput extends StatelessWidget {
                     Container(
                       width: 30,
                       height: 30,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.sageDark),
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.rust),
                       alignment: Alignment.center,
                       child: Text(name.isEmpty ? '?' : name[0].toUpperCase(),
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.workSans(
                               fontWeight: FontWeight.w800, fontSize: 12, color: Colors.white)),
                     ),
                     const SizedBox(width: 10),
@@ -310,7 +450,7 @@ class FamilyRatingInput extends StatelessWidget {
                         child: Text(name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w800))),
+                            style: GoogleFonts.workSans(fontSize: 14, fontWeight: FontWeight.w800))),
                     StarRow(value: ratings[id] ?? 0, onPick: (n) => onRate(id, n)),
                   ],
                 ),
@@ -322,8 +462,9 @@ class FamilyRatingInput extends StatelessWidget {
                   maxLines: 2,
                   minLines: 2,
                   maxLength: 180,
+                  cursorColor: AppColors.rust,
                   decoration: _commentDec().copyWith(hintText: 'What did $name think? (optional)'),
-                  style: GoogleFonts.inter(fontSize: 14, color: AppColors.ink),
+                  style: GoogleFonts.workSans(fontSize: 14, color: AppColors.ink),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -347,7 +488,7 @@ class FamilyRatingInput extends StatelessWidget {
                           alignment: Alignment.center,
                           child: Text('Last member — use submit below',
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
+                              style: GoogleFonts.workSans(
                                   fontSize: 12, color: AppColors.muted, fontWeight: FontWeight.w600)),
                         ),
                       ),
@@ -371,28 +512,36 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: mintStyle ? AppColors.mint : AppColors.sageDark,
-          foregroundColor: mintStyle ? AppColors.chipText : Colors.white,
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: mintStyle ? AppColors.mintBorder : AppColors.sageDark),
+    final bg = mintStyle ? AppColors.clay : AppColors.rust;
+    return Ticketed(
+      cut: 12,
+      child: SizedBox(
+        width: double.infinity,
+        child: Material(
+          color: bg,
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 54),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[Icon(icon, size: 17, color: Colors.white), const SizedBox(width: 8)],
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.workSans(
+                          fontWeight: FontWeight.w700, fontSize: 14.5, color: Colors.white, height: 1.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          elevation: 0,
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13.5),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[Icon(icon, size: 16), const SizedBox(width: 8)],
-            Flexible(child: Text(label, textAlign: TextAlign.center)),
-          ],
         ),
       ),
     );
@@ -411,11 +560,19 @@ class GhostButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.sageDark,
-          minimumSize: const Size.fromHeight(50),
-          side: const BorderSide(color: AppColors.sage, width: 1.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13),
+          foregroundColor: AppColors.rust,
+          backgroundColor: AppColors.creamCard,
+          minimumSize: const Size.fromHeight(54),
+          side: const BorderSide(color: AppColors.rust, width: 1.5),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(14),
+              topRight: Radius.circular(14),
+              bottomLeft: Radius.circular(14),
+              bottomRight: Radius.circular(4),
+            ),
+          ),
+          textStyle: GoogleFonts.workSans(fontWeight: FontWeight.w700, fontSize: 13.5),
         ),
         child: Text(label),
       ),
@@ -428,25 +585,25 @@ class SelectChip extends StatelessWidget {
   final bool on;
   final VoidCallback tap;
   final Color onBg;
-  const SelectChip({super.key, required this.label, required this.on, required this.tap, this.onBg = AppColors.sageDark});
+  const SelectChip({super.key, required this.label, required this.on, required this.tap, this.onBg = AppColors.rust});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: tap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
-          color: on ? onBg : AppColors.mint,
+          color: on ? onBg : AppColors.creamCard,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: on ? onBg : AppColors.mintBorder),
+          border: Border.all(color: on ? onBg : AppColors.line, width: 1.5),
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.workSans(
             fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: on ? Colors.white : AppColors.chipText,
+            fontWeight: FontWeight.w700,
+            color: on ? Colors.white : AppColors.ink,
           ),
         ),
       ),
@@ -461,20 +618,31 @@ class MiniTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (dark) {
+      // Standout attribute — one solid clay tag per card.
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: BoxDecoration(
+          color: AppColors.clay,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.workSans(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white),
+        ),
+      );
+    }
+    // Quiet outlined chips for everything else.
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: dark ? AppColors.sageDark : AppColors.mint,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: dark ? AppColors.sageDark : AppColors.mintBorder),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.clayLine),
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
-          fontSize: 11.5,
-          fontWeight: FontWeight.w600,
-          color: dark ? Colors.white : AppColors.chipText,
-        ),
+        style: GoogleFonts.workSans(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.muted),
       ),
     );
   }
@@ -493,18 +661,18 @@ class StarRow extends StatelessWidget {
         final n = i + 1;
         final on = value >= n;
         return Padding(
-          padding: const EdgeInsets.only(right: 4),
+          padding: const EdgeInsets.only(right: 6),
           child: GestureDetector(
             onTap: () => onPick(n),
             child: Container(
-              width: 30,
-              height: 30,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
-                color: on ? AppColors.mint : Colors.white,
+                color: on ? AppColors.rust : Colors.white,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: on ? AppColors.sageDark : AppColors.inputBorder, width: 1.5),
+                border: Border.all(color: on ? AppColors.rust : AppColors.line, width: 1.5),
               ),
-              child: Icon(Icons.star, size: 14, color: on ? AppColors.sageDark : AppColors.inputBorder),
+              child: Icon(Icons.star, size: 15, color: on ? Colors.white : AppColors.muted2),
             ),
           ),
         );
@@ -520,28 +688,35 @@ class FamiliaBottomNav extends StatelessWidget {
 
   Widget item(BuildContext context, String key, IconData icon, String label) {
     final on = current == key;
+    final color = on ? AppColors.clay : Colors.white.withValues(alpha: 0.62);
     return Expanded(
       child: GestureDetector(
         onTap: () => onNav(key),
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 7),
-          decoration: BoxDecoration(
-            color: on ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          color: Colors.transparent,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 15, color: on ? Colors.white : Colors.white.withValues(alpha: 0.85)),
-              const SizedBox(height: 3),
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 4),
               Text(
-                label.toUpperCase(),
-                style: GoogleFonts.inter(
-                  fontSize: 9,
+                label,
+                style: GoogleFonts.workSans(
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: 0.05 * 9,
-                  color: on ? Colors.white : Colors.white.withValues(alpha: 0.85),
+                  letterSpacing: 0.2,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Container(
+                width: 22,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: on ? AppColors.clay : Colors.transparent,
+                  borderRadius: BorderRadius.circular(99),
                 ),
               ),
             ],
@@ -555,15 +730,14 @@ class FamiliaBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.sage,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-        border: Border(top: BorderSide(color: Color(0x33FFFFFF))),
+        color: AppColors.navBrown,
+        border: Border(top: BorderSide(color: Color(0x22FFFFFF))),
       ),
-      padding: EdgeInsets.fromLTRB(10, 8, 10, 8 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(10, 10, 10, 8 + MediaQuery.of(context).padding.bottom),
       child: Row(
         children: [
           item(context, 'home', Icons.explore_outlined, 'Discover'),
-          item(context, 'ai', Icons.smart_toy_outlined, 'AI'),
+          item(context, 'ai', Icons.auto_awesome_outlined, 'AI'),
           item(context, 'reviews', Icons.star_outline, 'Reviews'),
           item(context, 'family', Icons.group_outlined, 'Family'),
         ],
@@ -584,42 +758,42 @@ Future<void> showFamiliaSheet(BuildContext context, String title, Widget body, {
       expand: false,
       builder: (_, ctrl) => Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.parchment,
           borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
         ),
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               child: Row(
                 children: [
-                  Expanded(
-                      child: Text(title,
-                          style: GoogleFonts.inter(
-                              fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.ink))),
+                  Expanded(child: Text(title, style: labelFraunces(size: 20))),
                   GestureDetector(
                     onTap: () => Navigator.pop(ctx),
                     child: Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.creamCard,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.inputBorder),
+                        border: Border.all(color: AppColors.line),
                       ),
-                      child: const Icon(Icons.close, size: 16, color: AppColors.sageDark),
+                      child: const Icon(Icons.close, size: 16, color: AppColors.rust),
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xFFF0EDE9)),
-            Expanded(child: SingleChildScrollView(controller: ctrl, padding: const EdgeInsets.all(18), child: body)),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: HandDivider(),
+            ),
+            Expanded(child: SingleChildScrollView(controller: ctrl, padding: const EdgeInsets.all(20), child: body)),
             if (foot != null)
               Container(
-                padding: EdgeInsets.fromLTRB(18, 14, 18, 14 + MediaQuery.of(ctx).padding.bottom),
+                padding: EdgeInsets.fromLTRB(20, 14, 20, 14 + MediaQuery.of(ctx).padding.bottom),
                 decoration: const BoxDecoration(
-                    border: Border(top: BorderSide(color: Color(0xFFF0EDE9))), color: Colors.white),
+                    border: Border(top: BorderSide(color: AppColors.line)), color: AppColors.parchment),
                 child: foot,
               ),
           ],
@@ -646,10 +820,10 @@ class NetImage extends StatelessWidget {
           height: height,
           fit: fit,
           loadingBuilder: (c, child, p) =>
-              p == null ? child : Container(width: width, height: height, color: const Color(0xFFECE9E6)),
+              p == null ? child : Container(width: width, height: height, color: AppColors.parchmentDeep),
           errorBuilder: (c, e, s) {
             if (u == fallback) {
-              return Container(width: width, height: height, color: const Color(0xFFECE9E6));
+              return Container(width: width, height: height, color: AppColors.parchmentDeep);
             }
             return img(fallback);
           },

@@ -23,7 +23,7 @@ const List<String> kNrLangs = ["English", "Arabic", "Turkish", "French", "Spanis
 const List<String> kNrAccess = ["Wheelchair accessible", "High chairs", "Step-free entry"];
 const List<String> kNrTags = ["Halal", "Vegetarian options", "Vegan options", "Gluten-free", "Outdoor seating", "Family friendly", "Kids menu", "Large portions", "Good desserts", "Cheap", "Quiet", "Fast service"];
 
-const List<String> kAvatarColors = ["#3E6B57", "#5A7D6B", "#B7791F", "#7A9B8A", "#8AA399", "#A3B25B", "#2F3D36"];
+const List<String> kAvatarColors = ["#9A4826", "#C97C48", "#6B7A4E", "#7A351D", "#B08954", "#5E2814", "#2E1B12"];
 
 const String kLandingImage =
     "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&auto=format&fit=crop&q=80";

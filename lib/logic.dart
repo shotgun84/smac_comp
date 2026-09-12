@@ -22,13 +22,13 @@ String starsDouble(double n) => stars(n.round());
 
 Color avatarColor(int i) {
   const palette = [
-    Color(0xFF3E6B57),
-    Color(0xFF5A7D6B),
-    Color(0xFFB7791F),
-    Color(0xFF7A9B8A),
-    Color(0xFF8AA399),
-    Color(0xFFA3B25B),
-    Color(0xFF2F3D36),
+    Color(0xFF9A4826),
+    Color(0xFFC97C48),
+    Color(0xFF6B7A4E),
+    Color(0xFF7A351D),
+    Color(0xFFB08954),
+    Color(0xFF5E2814),
+    Color(0xFF2E1B12),
   ];
   return palette[i % palette.length];
 }

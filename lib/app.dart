@@ -248,7 +248,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
             if (error.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(error,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.workSans(
                       fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.danger)),
             ],
           ],
@@ -462,17 +462,24 @@ class _FamiliaRootState extends State<FamiliaRoot> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        backgroundColor: AppColors.creamCard,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(18),
+            topRight: Radius.circular(18),
+            bottomLeft: Radius.circular(18),
+            bottomRight: Radius.circular(4),
+          ),
+        ),
         title: Text('Clear everything?',
-            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.ink)),
+            style: GoogleFonts.fraunces(fontSize: 19, fontWeight: FontWeight.w700, color: AppColors.ink)),
         content: Text('This wipes the name, photo, chips, party details and all ratings you entered.',
-            style: GoogleFonts.inter(fontSize: 13.5, color: AppColors.muted, height: 1.5)),
+            style: GoogleFonts.workSans(fontSize: 13.5, color: AppColors.muted, height: 1.5)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Keep editing',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: AppColors.sageDark)),
+                style: GoogleFonts.workSans(fontWeight: FontWeight.w700, color: AppColors.rust)),
           ),
           TextButton(
             onPressed: () {
@@ -481,7 +488,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
             },
             child: Text('Clear it',
                 style:
-                    GoogleFonts.inter(fontWeight: FontWeight.w800, color: AppColors.danger)),
+                    GoogleFonts.workSans(fontWeight: FontWeight.w800, color: AppColors.danger)),
           ),
         ],
       ),
@@ -667,7 +674,10 @@ class _FamiliaRootState extends State<FamiliaRoot> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600)), duration: const Duration(seconds: 2)),
+      SnackBar(
+          backgroundColor: AppColors.navBrown,
+          content: Text(msg, style: GoogleFonts.workSans(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+          duration: const Duration(seconds: 2)),
     );
   }
 
@@ -723,30 +733,30 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                 ],
               ),
               Text('hard — must have',
-                  style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFFACACB8))),
+                  style: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted)),
               const SizedBox(height: 6),
-              grid(kDietary, memberDietary, AppColors.reqBrown),
+              grid(kDietary, memberDietary, AppColors.rust),
               const SizedBox(height: 6),
               Text('Allergic to something? Pick it under Allergies below — we exclude it automatically.',
-                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.muted, height: 1.4)),
+                  style: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted, height: 1.4)),
               const SizedBox(height: 12),
               const SectionLabel('Allergies'),
               Text('hard — cannot have',
-                  style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFFACACB8))),
+                  style: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted)),
               const SizedBox(height: 6),
               grid(kAllergies, memberAllergies, AppColors.ink),
               const SizedBox(height: 12),
               const SectionLabel('Dining preferences'),
               Text('soft — venue & vibe',
-                  style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFFACACB8))),
+                  style: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted)),
               const SizedBox(height: 6),
-              grid(kDiningPrefs, memberPrefs, AppColors.sageDark),
+              grid(kDiningPrefs, memberPrefs, AppColors.moss),
               const SizedBox(height: 12),
               const SectionLabel('Personal tastes'),
               Text('soft — personal',
-                  style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFFACACB8))),
+                  style: GoogleFonts.workSans(fontSize: 11, color: AppColors.muted)),
               const SizedBox(height: 6),
-              grid(kTastePrefs, memberPrefs, AppColors.sageDark),
+              grid(kTastePrefs, memberPrefs, AppColors.moss),
             ],
           );
         },
@@ -767,9 +777,16 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.danger,
-                  minimumSize: const Size.fromHeight(50),
-                  side: const BorderSide(color: Color(0xFFE8C48A)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  minimumSize: const Size.fromHeight(54),
+                  side: const BorderSide(color: AppColors.clayLine),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(14),
+                      topRight: Radius.circular(14),
+                      bottomLeft: Radius.circular(14),
+                      bottomRight: Radius.circular(4),
+                    ),
+                  ),
                 ),
                 child: const Text('Remove'),
               ),
@@ -815,10 +832,17 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                 syncFamilyToCloud();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.sageDark,
+                backgroundColor: AppColors.rust,
                 foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                minimumSize: const Size.fromHeight(54),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(14),
+                    topRight: Radius.circular(14),
+                    bottomLeft: Radius.circular(14),
+                    bottomRight: Radius.circular(4),
+                  ),
+                ),
                 elevation: 0,
               ),
               child: const Text('Save member'),
@@ -857,17 +881,17 @@ class _FamiliaRootState extends State<FamiliaRoot> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
-                        color: on ? AppColors.sageDark : AppColors.mint,
+                        color: on ? AppColors.rust : AppColors.creamCard,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                            color: on ? AppColors.sageDark : AppColors.inputBorder, width: 1.5),
+                            color: on ? AppColors.rust : AppColors.line, width: 1.5),
                       ),
                       child: Text(o.$2,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.workSans(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: on ? Colors.white : AppColors.chipText)),
+                              color: on ? Colors.white : AppColors.ink)),
                     ),
                   );
                 }).toList(),
@@ -1065,11 +1089,11 @@ class _FamiliaRootState extends State<FamiliaRoot> {
             const SizedBox(
               width: 32,
               height: 32,
-              child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.sageDark),
+              child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.rust),
             ),
             const SizedBox(height: 14),
             Text('Loading restaurants…',
-                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.muted)),
+                style: GoogleFonts.workSans(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.muted)),
           ],
         ),
       ),
@@ -1084,11 +1108,11 @@ class _FamiliaRootState extends State<FamiliaRoot> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Couldn\'t load restaurants',
-                style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w800)),
+                style: GoogleFonts.fraunces(fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(loadError ?? 'Check your connection and retry.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(fontSize: 13, color: AppColors.muted, height: 1.5)),
+                style: GoogleFonts.workSans(fontSize: 13, color: AppColors.muted, height: 1.5)),
             const SizedBox(height: 16),
             SizedBox(
               width: 200,
@@ -1230,7 +1254,7 @@ class _FamiliaRootState extends State<FamiliaRoot> {
     final showReviewFoot = screen == 'review';
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.parchment,
       body: LayoutBuilder(
         builder: (context, c) {
           final wide = c.maxWidth > 520;
@@ -1238,17 +1262,17 @@ class _FamiliaRootState extends State<FamiliaRoot> {
             constraints: const BoxConstraints(maxWidth: 430),
             decoration: wide
                 ? BoxDecoration(
-                    color: AppColors.cream,
+                    color: AppColors.parchment,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppColors.line),
                     boxShadow: [
                       BoxShadow(
-                          color: AppColors.sageDark.withValues(alpha: 0.12),
+                          color: AppColors.rust.withValues(alpha: 0.16),
                           blurRadius: 40,
                           offset: const Offset(0, 20)),
                     ],
                   )
-                : const BoxDecoration(color: AppColors.cream),
+                : const BoxDecoration(color: AppColors.parchment),
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [

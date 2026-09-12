@@ -71,33 +71,35 @@ class ReviewScreen extends StatelessWidget {
         children: [
           PageBanner(
             title: 'New restaurant review',
+            titleSize: 30,
             subtitle: Text('Been somewhere new? Add it for every family.', style: bannerSub()),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 150),
+            padding: const EdgeInsets.fromLTRB(22, 20, 22, 150),
             child: Column(
               children: [
                 WhiteCard(
+                  sharp: true,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SectionLabel('Restaurant name'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       FamiliaInput(controller: nameCtrl, hint: 'e.g. Olive Branch', maxLength: 40,
                           onChanged: (v) => draft.name = v),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Photo'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       GestureDetector(
                         onTap: onPickPhoto,
                         behavior: HitTestBehavior.opaque,
                         child: Container(
                           width: double.infinity,
-                          padding: draft.photoBytes.isEmpty ? const EdgeInsets.all(18) : EdgeInsets.zero,
+                          padding: draft.photoBytes.isEmpty ? const EdgeInsets.all(20) : EdgeInsets.zero,
                           decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.inputBorder, width: 1.5),
-                            borderRadius: BorderRadius.circular(10),
-                            color: const Color(0xFFF6FAF4),
+                            border: Border.all(color: AppColors.line, width: 1.5),
+                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.claySoft.withValues(alpha: 0.4),
                           ),
                           child: draft.photoBytes.isEmpty
                               ? Column(
@@ -106,14 +108,14 @@ class ReviewScreen extends StatelessWidget {
                                         size: 22, color: AppColors.muted),
                                     const SizedBox(height: 8),
                                     Text('Tap to add a photo',
-                                        style: GoogleFonts.inter(
+                                        style: GoogleFonts.workSans(
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.w600,
                                             color: AppColors.muted)),
                                   ],
                                 )
                               : ClipRRect(
-                                  borderRadius: BorderRadius.circular(9),
+                                  borderRadius: BorderRadius.circular(10),
                                   child: Image.memory(
                                     Uint8List.fromList(draft.photoBytes),
                                     width: double.infinity,
@@ -132,10 +134,10 @@ class ReviewScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SectionLabel('Cuisine'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 7,
+                        runSpacing: 7,
                         children: kCuisines
                             .map((c) => SelectChip(
                                 label: c,
@@ -146,32 +148,32 @@ class ReviewScreen extends StatelessWidget {
                                 }))
                             .toList(),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Seating'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 7,
+                        runSpacing: 7,
                         children: kNrSeating
                             .map((c) => SelectChip(
                                 label: c, on: draft.seating.contains(c), tap: () => toggleList(draft.seating, c)))
                             .toList(),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Opening hours'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       FamiliaInput(controller: hoursCtrl, hint: 'e.g. 11:00 AM – 11:00 PM',
                           maxLength: 40, onChanged: (v) => draft.hours = v),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Emirate'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         initialValue: kEmirates.contains(draft.city) ? draft.city : kEmirates.first,
                         items: kEmirates
                             .map((e) => DropdownMenuItem(
                                   value: e,
                                   child: Text(e,
-                                      style: GoogleFonts.inter(
+                                      style: GoogleFonts.workSans(
                                           fontSize: 14.5,
                                           fontWeight: FontWeight.w500,
                                           color: AppColors.ink)),
@@ -187,30 +189,31 @@ class ReviewScreen extends StatelessWidget {
                           filled: true,
                           fillColor: Colors.white,
                           contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                                color: AppColors.inputBorder, width: 1.5),
+                                color: AppColors.line, width: 1.5),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                                color: AppColors.sageDark, width: 1.5),
+                                color: AppColors.clay, width: 2),
                           ),
                         ),
-                        dropdownColor: Colors.white,
+                        dropdownColor: AppColors.creamCard,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
                 WhiteCard(
+                  sharp: true,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SectionLabel('Your visit'),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -219,15 +222,15 @@ class ReviewScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Party size',
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.workSans(
                                         fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.muted)),
                                 const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                                   decoration: BoxDecoration(
                                       color: Colors.white,
-                                      border: Border.all(color: AppColors.inputBorder, width: 1.5),
-                                      borderRadius: BorderRadius.circular(10)),
+                                      border: Border.all(color: AppColors.line, width: 1.5),
+                                      borderRadius: BorderRadius.circular(12)),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
@@ -236,7 +239,7 @@ class ReviewScreen extends StatelessWidget {
                                         refresh();
                                       }),
                                       Text('${draft.party}',
-                                          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w800)),
+                                          style: GoogleFonts.workSans(fontSize: 16, fontWeight: FontWeight.w800)),
                                       _step('+', () {
                                         draft.party = (draft.party + 1).clamp(1, 20);
                                         refresh();
@@ -253,7 +256,7 @@ class ReviewScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Total bill (AED)',
-                                    style: GoogleFonts.inter(
+                                    style: GoogleFonts.workSans(
                                         fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.muted)),
                                 const SizedBox(height: 8),
                                 FamiliaInput(
@@ -272,13 +275,13 @@ class ReviewScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(perPerson, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFA9A9B6))),
-                      const SizedBox(height: 14),
+                      Text(perPerson, style: GoogleFonts.workSans(fontSize: 12, color: AppColors.muted)),
+                      const SizedBox(height: 16),
                       const SectionLabel('Wait for food'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 7,
+                        runSpacing: 7,
                         children: kNrWait
                             .map((c) => SelectChip(
                                 label: c,
@@ -289,23 +292,23 @@ class ReviewScreen extends StatelessWidget {
                                 }))
                             .toList(),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Languages staff spoke'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 7,
+                        runSpacing: 7,
                         children: kNrLangs
                             .map((c) => SelectChip(
                                 label: c, on: draft.langs.contains(c), tap: () => toggleList(draft.langs, c)))
                             .toList(),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Accessibility'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 7,
+                        runSpacing: 7,
                         children: kNrAccess
                             .map((c) => SelectChip(
                                 label: c, on: draft.access.contains(c), tap: () => toggleList(draft.access, c)))
@@ -315,15 +318,17 @@ class ReviewScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                WhiteCard(
+                const HandDivider(),
+                const SizedBox(height: 16),
+                TintCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SectionLabel('Good to know'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
+                        spacing: 7,
+                        runSpacing: 7,
                         children: kNrTags
                             .map((c) => SelectChip(
                                 label: c, on: draft.tags.contains(c), tap: () => toggleList(draft.tags, c)))
@@ -338,15 +343,15 @@ class ReviewScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SectionLabel('Who went?'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       if (members.isEmpty)
                         Text('No family members — reviewing as Guest.',
-                            style: GoogleFonts.inter(
-                                fontSize: 12.5, color: const Color(0xFF8B8B97), fontWeight: FontWeight.w600))
+                            style: GoogleFonts.workSans(
+                                fontSize: 12.5, color: AppColors.muted, fontWeight: FontWeight.w600))
                       else
                         Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
+                          spacing: 7,
+                          runSpacing: 7,
                           children: members
                               .map((m) => SelectChip(
                                   label: m.name,
@@ -357,9 +362,9 @@ class ReviewScreen extends StatelessWidget {
                                   }))
                               .toList(),
                         ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                       const SectionLabel('Family ratings'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       FamilyRatingInput(
                         entries: nrEntries(),
                         ratings: draft.ratings,
@@ -398,14 +403,15 @@ class ReviewScreen extends StatelessWidget {
     return GestureDetector(
       onTap: tap,
       child: Container(
-        width: 34,
-        height: 34,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
-            color: AppColors.mint,
-            border: Border.all(color: AppColors.inputBorder, width: 1.5),
-            borderRadius: BorderRadius.circular(8)),
+            color: AppColors.claySoft,
+            border: Border.all(color: AppColors.clayLine, width: 1.5),
+            borderRadius: BorderRadius.circular(10)),
         alignment: Alignment.center,
-        child: Text(label, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800)),
+        child: Text(label,
+            style: GoogleFonts.workSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.rust)),
       ),
     );
   }
@@ -420,9 +426,9 @@ class ReviewFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(14, 12, 14, 12 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
       decoration:
-          const BoxDecoration(color: AppColors.cream, border: Border(top: BorderSide(color: AppColors.line))),
+          const BoxDecoration(color: AppColors.parchment, border: Border(top: BorderSide(color: AppColors.line))),
       child: Row(
         children: [
           Expanded(child: GhostButton(label: 'Clear', onTap: onClear)),

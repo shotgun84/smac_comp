@@ -45,7 +45,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Skip'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('REVIEWS'));
+    await tester.tap(find.text('Reviews'));
     await tester.pumpAndSettle();
     expect(find.text('New restaurant review'), findsOneWidget);
     await tester.tap(find.textContaining('Add restaurant'));
